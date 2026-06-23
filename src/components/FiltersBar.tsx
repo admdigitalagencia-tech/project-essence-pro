@@ -1,4 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { X } from "lucide-react";
@@ -7,10 +13,22 @@ import { AREAS, PRIORITIES, STATUSES, STATUS_LABELS, PRIORITY_LABELS } from "@/l
 import { useWorkOrigins, useDataSources, useProjects } from "@/lib/queries";
 
 const ANY = "__any__";
+const SCORE_VALUES = [
+  { value: "0", label: "Qualquer nota" },
+  { value: "4", label: "4+" },
+  { value: "6", label: "6+" },
+  { value: "8", label: "8+" },
+];
 
 export function FiltersBar({
-  filters, update, reset,
-}: { filters: Filters; update: (p: Partial<Filters>) => void; reset: () => void }) {
+  filters,
+  update,
+  reset,
+}: {
+  filters: Filters;
+  update: (p: Partial<Filters>) => void;
+  reset: () => void;
+}) {
   const { data: origins = [] } = useWorkOrigins();
   const { data: sources = [] } = useDataSources();
   const { data: projects = [] } = useProjects();
@@ -21,9 +39,14 @@ export function FiltersBar({
 
   return (
     <Card className="p-4 mb-6 border-border/60 shadow-none">
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <Select value={filters.period} onValueChange={(v) => update({ period: v as Filters["period"] })}>
-          <SelectTrigger><SelectValue placeholder="Período" /></SelectTrigger>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3">
+        <Select
+          value={filters.period}
+          onValueChange={(v) => update({ period: v as Filters["period"] })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Período" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todo período</SelectItem>
             <SelectItem value="7d">Últimos 7 dias</SelectItem>
@@ -33,50 +56,118 @@ export function FiltersBar({
         </Select>
 
         <Select value={sel(filters.work_origin_id)} onValueChange={onChange("work_origin_id")}>
-          <SelectTrigger><SelectValue placeholder="Origem" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Origem" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value={ANY}>Todas origens</SelectItem>
-            {origins.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+            {origins.map((o) => (
+              <SelectItem key={o.id} value={o.id}>
+                {o.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Select value={sel(filters.data_source_id)} onValueChange={onChange("data_source_id")}>
-          <SelectTrigger><SelectValue placeholder="Fonte" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Fonte" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value={ANY}>Todas fontes</SelectItem>
-            {sources.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            {sources.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
+                {s.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Select value={sel(filters.project_id)} onValueChange={onChange("project_id")}>
-          <SelectTrigger><SelectValue placeholder="Projeto" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Projeto" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value={ANY}>Todos projetos</SelectItem>
-            {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Select value={sel(filters.area)} onValueChange={onChange("area")}>
-          <SelectTrigger><SelectValue placeholder="Área" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Área" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value={ANY}>Todas áreas</SelectItem>
-            {AREAS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+            {AREAS.map((a) => (
+              <SelectItem key={a} value={a}>
+                {a}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Select value={sel(filters.status)} onValueChange={onChange("status")}>
-          <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value={ANY}>Todos status</SelectItem>
-            {STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}
+            {STATUSES.map((s) => (
+              <SelectItem key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
         <Select value={sel(filters.priority)} onValueChange={onChange("priority")}>
-          <SelectTrigger><SelectValue placeholder="Prioridade" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="Prioridade" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value={ANY}>Todas prioridades</SelectItem>
-            {PRIORITIES.map((p) => <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>)}
+            {PRIORITIES.map((p) => (
+              <SelectItem key={p} value={p}>
+                {PRIORITY_LABELS[p]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={String(filters.impactMin)}
+          onValueChange={(v) => update({ impactMin: Number(v) })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Impacto mínimo" />
+          </SelectTrigger>
+          <SelectContent>
+            {SCORE_VALUES.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                Impacto {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={String(filters.complexityMin)}
+          onValueChange={(v) => update({ complexityMin: Number(v) })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Complexidade mínima" />
+          </SelectTrigger>
+          <SelectContent>
+            {SCORE_VALUES.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                Complexidade {item.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

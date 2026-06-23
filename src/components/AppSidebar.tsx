@@ -1,8 +1,19 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Layers, FolderKanban, ListChecks, Plus,
-  Upload, FileBarChart, Settings,
+  LayoutDashboard,
+  Layers,
+  FolderKanban,
+  ListChecks,
+  Plus,
+  Upload,
+  FileBarChart,
+  Settings,
+  LogOut,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const items = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -17,11 +28,26 @@ const items = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { session } = useAuth();
+
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Sessao encerrada");
+  }
+
+  if (!session) return null;
+
   return (
     <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
       <div className="px-5 py-5 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground grid place-items-center font-semibold">L</div>
+          <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground grid place-items-center font-semibold">
+            L
+          </div>
           <div className="leading-tight">
             <div className="font-semibold text-sm text-sidebar-foreground">Lucas</div>
             <div className="text-[11px] text-muted-foreground">Productivity OS</div>
@@ -50,8 +76,12 @@ export function AppSidebar() {
           );
         })}
       </nav>
-      <div className="p-4 text-[11px] text-muted-foreground border-t border-sidebar-border">
-        v0.1 · single user
+      <div className="p-4 border-t border-sidebar-border space-y-3">
+        <div className="text-[11px] text-muted-foreground truncate">{session.user.email}</div>
+        <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
+          <LogOut className="h-3.5 w-3.5 mr-1.5" />
+          Sair
+        </Button>
       </div>
     </aside>
   );

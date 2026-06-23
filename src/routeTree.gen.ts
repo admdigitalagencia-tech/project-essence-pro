@@ -9,38 +9,194 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as ProjetosRouteImport } from './routes/projetos'
+import { Route as OrigensRouteImport } from './routes/origens'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ImportacoesRouteImport } from './routes/importacoes'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TasksNovaRouteImport } from './routes/tasks.nova'
 
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjetosRoute = ProjetosRouteImport.update({
+  id: '/projetos',
+  path: '/projetos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrigensRoute = OrigensRouteImport.update({
+  id: '/origens',
+  path: '/origens',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportacoesRoute = ImportacoesRouteImport.update({
+  id: '/importacoes',
+  path: '/importacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TasksNovaRoute = TasksNovaRouteImport.update({
+  id: '/nova',
+  path: '/nova',
+  getParentRoute: () => TasksRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/importacoes': typeof ImportacoesRoute
+  '/login': typeof LoginRoute
+  '/origens': typeof OrigensRoute
+  '/projetos': typeof ProjetosRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/tasks': typeof TasksRouteWithChildren
+  '/tasks/nova': typeof TasksNovaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/importacoes': typeof ImportacoesRoute
+  '/login': typeof LoginRoute
+  '/origens': typeof OrigensRoute
+  '/projetos': typeof ProjetosRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/tasks': typeof TasksRouteWithChildren
+  '/tasks/nova': typeof TasksNovaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/importacoes': typeof ImportacoesRoute
+  '/login': typeof LoginRoute
+  '/origens': typeof OrigensRoute
+  '/projetos': typeof ProjetosRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/tasks': typeof TasksRouteWithChildren
+  '/tasks/nova': typeof TasksNovaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/configuracoes'
+    | '/importacoes'
+    | '/login'
+    | '/origens'
+    | '/projetos'
+    | '/relatorios'
+    | '/tasks'
+    | '/tasks/nova'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/configuracoes'
+    | '/importacoes'
+    | '/login'
+    | '/origens'
+    | '/projetos'
+    | '/relatorios'
+    | '/tasks'
+    | '/tasks/nova'
+  id:
+    | '__root__'
+    | '/'
+    | '/configuracoes'
+    | '/importacoes'
+    | '/login'
+    | '/origens'
+    | '/projetos'
+    | '/relatorios'
+    | '/tasks'
+    | '/tasks/nova'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ImportacoesRoute: typeof ImportacoesRoute
+  LoginRoute: typeof LoginRoute
+  OrigensRoute: typeof OrigensRoute
+  ProjetosRoute: typeof ProjetosRoute
+  RelatoriosRoute: typeof RelatoriosRoute
+  TasksRoute: typeof TasksRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projetos': {
+      id: '/projetos'
+      path: '/projetos'
+      fullPath: '/projetos'
+      preLoaderRoute: typeof ProjetosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/origens': {
+      id: '/origens'
+      path: '/origens'
+      fullPath: '/origens'
+      preLoaderRoute: typeof OrigensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/importacoes': {
+      id: '/importacoes'
+      path: '/importacoes'
+      fullPath: '/importacoes'
+      preLoaderRoute: typeof ImportacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +204,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tasks/nova': {
+      id: '/tasks/nova'
+      path: '/nova'
+      fullPath: '/tasks/nova'
+      preLoaderRoute: typeof TasksNovaRouteImport
+      parentRoute: typeof TasksRoute
+    }
   }
 }
 
+interface TasksRouteChildren {
+  TasksNovaRoute: typeof TasksNovaRoute
+}
+
+const TasksRouteChildren: TasksRouteChildren = {
+  TasksNovaRoute: TasksNovaRoute,
+}
+
+const TasksRouteWithChildren = TasksRoute._addFileChildren(TasksRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  ImportacoesRoute: ImportacoesRoute,
+  LoginRoute: LoginRoute,
+  OrigensRoute: OrigensRoute,
+  ProjetosRoute: ProjetosRoute,
+  RelatoriosRoute: RelatoriosRoute,
+  TasksRoute: TasksRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
