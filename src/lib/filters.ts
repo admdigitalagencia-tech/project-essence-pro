@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Task } from "./db";
 import { AREAS, PRIORITIES, STATUSES } from "./constants";
 
@@ -26,28 +26,8 @@ export const initialFilters: Filters = {
   complexityMin: 0,
 };
 
-const FILTERS_STORAGE_KEY = "lucas-productivity-os.filters";
-
 export function useFilters() {
   const [filters, setFilters] = useState<Filters>(initialFilters);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = window.localStorage.getItem(FILTERS_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as Partial<Filters>;
-      setFilters({ ...initialFilters, ...parsed });
-    } catch {
-      window.localStorage.removeItem(FILTERS_STORAGE_KEY);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
-  }, [filters]);
-
   const update = (patch: Partial<Filters>) => setFilters((f) => ({ ...f, ...patch }));
   const reset = () => setFilters(initialFilters);
   return { filters, update, reset };
