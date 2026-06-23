@@ -116,9 +116,6 @@ function NovaTask() {
             <Field label="Título">
               <Input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Ex.: Otimizar campanha Performance Max" required />
             </Field>
-            <Field label="Descrição">
-              <Textarea rows={3} value={f.description} onChange={(e) => set("description", e.target.value)} />
-            </Field>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Field label="Área">
                 <Select value={selVal(f.area)} onValueChange={(v) => set("area", fromSel(v))}>
@@ -161,12 +158,6 @@ function NovaTask() {
               <Field label="Prazo"><Input type="date" value={f.deadline} onChange={(e) => set("deadline", e.target.value)} /></Field>
               <Field label="Conclusão"><Input type="date" value={f.completed_at} onChange={(e) => set("completed_at", e.target.value)} /></Field>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Tempo estimado (h)"><Input type="number" step="0.25" value={f.estimated_time} onChange={(e) => set("estimated_time", e.target.value)} /></Field>
-              <Field label="Tempo real (h)"><Input type="number" step="0.25" value={f.actual_time} onChange={(e) => set("actual_time", e.target.value)} /></Field>
-            </div>
-            <Field label="Evidência"><Textarea rows={2} value={f.evidence} onChange={(e) => set("evidence", e.target.value)} placeholder="Link, print, doc…" /></Field>
-            <Field label="Resultado gerado"><Textarea rows={2} value={f.result} onChange={(e) => set("result", e.target.value)} /></Field>
           </Card>
         </div>
 
