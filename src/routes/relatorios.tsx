@@ -45,7 +45,7 @@ function ReportsPage() {
     <PageContainer>
       <PageHeader title="Relatórios" subtitle="Resumos executivos por visão" action={
         <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
-          <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="global">Visão global</SelectItem>
             <SelectItem value="origin">Por origem do trabalho</SelectItem>
@@ -55,8 +55,8 @@ function ReportsPage() {
       } />
       <FiltersBar filters={filters} update={update} reset={reset} />
 
-      <div className="space-y-4">
-        {data.length === 0 && <Card className="p-8 text-center text-muted-foreground">Sem dados para gerar relatório.</Card>}
+      <div className="space-y-4 lg:space-y-6">
+        {data.length === 0 && <Card className="p-10 text-center text-muted-foreground border-dashed">Sem dados para gerar relatório.</Card>}
         {data.map((g) => <ReportCard key={g.label} title={g.label} tasks={g.tasks} projects={projects} />)}
       </div>
     </PageContainer>
@@ -83,10 +83,10 @@ function ReportCard({ title, tasks, projects }: { title: string; tasks: any[]; p
   const topAreas = [...byArea.entries()].sort((a,b) => b[1]-a[1]).slice(0, 5);
 
   return (
-    <Card className="p-6 border-border/60 shadow-none">
-      <div className="flex items-baseline justify-between mb-4">
+    <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between mb-5 pb-4 border-b border-border/60">
         <h2 className="text-lg font-semibold">{title}</h2>
-        <div className="text-xs text-muted-foreground">Score médio: <span className="font-medium text-foreground">{avgScore.toFixed(1)}</span> · {classifyScore(avgScore).label}</div>
+        <div className="text-xs text-muted-foreground">Score médio: <span className="font-semibold text-foreground tabular-nums">{avgScore.toFixed(1)}</span> · {classifyScore(avgScore).label}</div>
       </div>
 
       <Section title="Resumo executivo">

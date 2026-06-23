@@ -80,11 +80,24 @@ function NovaTask() {
 
   return (
     <PageContainer>
-      <PageHeader title="Nova Task" subtitle="Cadastro manual de uma task" />
-      <form onSubmit={submit} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 space-y-4">
-          <Card className="p-5 border-border/60 shadow-none space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <PageHeader
+        title="Nova Task"
+        subtitle="Cadastro manual de uma task"
+        action={
+          <>
+            <Button type="button" variant="outline" onClick={() => navigate({ to: "/tasks" })}>Cancelar</Button>
+            <Button type="button" onClick={(e) => submit(e as unknown as React.FormEvent)}>Criar task</Button>
+          </>
+        }
+      />
+      <form onSubmit={submit} className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="lg:col-span-2 space-y-4 lg:space-y-6 min-w-0">
+          <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
+            <SectionTitle>Identificação</SectionTitle>
+            <Field label="Título" required>
+              <Input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Ex.: Otimizar campanha Performance Max" required />
+            </Field>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
               <Field label="Origem do trabalho">
                 <Select value={selVal(f.work_origin_id)} onValueChange={(v) => set("work_origin_id", fromSel(v))}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -113,9 +126,10 @@ function NovaTask() {
                 </Select>
               </Field>
             </div>
-            <Field label="Título">
-              <Input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Ex.: Otimizar campanha Performance Max" required />
-            </Field>
+          </Card>
+
+          <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
+            <SectionTitle>Classificação</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Field label="Área">
                 <Select value={selVal(f.area)} onValueChange={(v) => set("area", fromSel(v))}>
@@ -139,7 +153,7 @@ function NovaTask() {
                 </Select>
               </Field>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
               <Field label="Status">
                 <Select value={f.status} onValueChange={(v) => set("status", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -153,7 +167,11 @@ function NovaTask() {
                 </Select>
               </Field>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          </Card>
+
+          <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
+            <SectionTitle>Datas</SectionTitle>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Field label="Data da task"><Input type="date" value={f.task_date} onChange={(e) => set("task_date", e.target.value)} /></Field>
               <Field label="Prazo"><Input type="date" value={f.deadline} onChange={(e) => set("deadline", e.target.value)} /></Field>
               <Field label="Conclusão"><Input type="date" value={f.completed_at} onChange={(e) => set("completed_at", e.target.value)} /></Field>
@@ -161,36 +179,53 @@ function NovaTask() {
           </Card>
         </div>
 
-        <div className="space-y-4">
-          <Card className="p-5 border-border/60 shadow-none">
-            <div className="text-sm font-medium mb-1">Score qualitativo</div>
-            <div className="text-xs text-muted-foreground mb-4">Cálculo automático com pesos: Impacto 30 · Complexidade 20 · Estratégia 20 · Urgência 15 · Evidência 15</div>
+        <div className="space-y-4 min-w-0">
+          <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0 lg:sticky lg:top-6">
+            <SectionTitle>Score qualitativo</SectionTitle>
+            <div className="text-xs text-muted-foreground mb-4 leading-relaxed">
+              Cálculo automático com pesos:<br />
+              Impacto 30 · Complexidade 20 · Estratégia 20 · Urgência 15 · Evidência 15
+            </div>
             <SliderField label="Impacto" value={f.impact} onChange={(v) => set("impact", v)} />
             <SliderField label="Complexidade" value={f.complexity} onChange={(v) => set("complexity", v)} />
             <SliderField label="Relevância estratégica" value={f.strategic_relevance} onChange={(v) => set("strategic_relevance", v)} />
             <SliderField label="Urgência" value={f.urgency} onChange={(v) => set("urgency", v)} />
             <SliderField label="Evidência/registro" value={f.evidence_score} onChange={(v) => set("evidence_score", v)} />
-            <div className="mt-4 p-4 rounded-lg bg-muted/50">
+            <div className="mt-5 p-4 rounded-lg border border-border/70 bg-muted/40">
               <div className="text-xs text-muted-foreground">Score previsto</div>
-              <div className="text-3xl font-semibold">{previewScore.toFixed(1)}</div>
-              <div className={`text-xs mt-1 ${cls.tone === "success" ? "text-success" : cls.tone === "warning" ? "text-warning-foreground" : "text-muted-foreground"}`}>{cls.label}</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <div className="text-3xl font-semibold tabular-nums">{previewScore.toFixed(1)}</div>
+                <div className="text-xs text-muted-foreground">/ 10</div>
+              </div>
+              <div className={`text-xs mt-1.5 font-medium ${cls.tone === "success" ? "text-success" : cls.tone === "warning" ? "text-warning-foreground" : cls.tone === "primary" ? "text-primary" : "text-muted-foreground"}`}>{cls.label}</div>
             </div>
+            <Button type="submit" className="w-full mt-5" size="lg">Criar task</Button>
           </Card>
-          <Button type="submit" className="w-full" size="lg">Criar task</Button>
         </div>
       </form>
     </PageContainer>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="space-y-1.5"><Label className="text-xs text-muted-foreground">{label}</Label>{children}</div>;
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <div className="text-sm font-semibold mb-4 text-foreground">{children}</div>;
+}
+
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5 min-w-0">
+      <Label className="text-xs font-medium text-muted-foreground">
+        {label}{required && <span className="text-destructive ml-0.5">*</span>}
+      </Label>
+      {children}
+    </div>
+  );
 }
 
 function SliderField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
-    <div className="mb-3">
-      <div className="flex justify-between text-xs mb-1.5"><span className="text-muted-foreground">{label}</span><span className="font-medium">{value}</span></div>
+    <div className="mb-4">
+      <div className="flex justify-between text-xs mb-2"><span className="text-muted-foreground">{label}</span><span className="font-semibold tabular-nums">{value}</span></div>
       <Slider min={0} max={10} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
     </div>
   );

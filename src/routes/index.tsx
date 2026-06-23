@@ -95,9 +95,9 @@ function Dashboard() {
         <EmptyState />
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <Stat icon={<TrendingUp className="h-4 w-4" />} label="Total de tasks" value={m.total} />
-            <Stat icon={<CheckCircle2 className="h-4 w-4" />} label="Concluídas" value={m.done} sub={m.total ? `${Math.round(m.done/m.total*100)}%` : "—"} />
+            <Stat icon={<CheckCircle2 className="h-4 w-4" />} label="Concluídas" value={m.done} sub={m.total ? `${Math.round(m.done/m.total*100)}% do total` : "—"} />
             <Stat icon={<FolderKanban className="h-4 w-4" />} label="Projetos ativos" value={m.activeProjects} />
             <Stat icon={<Star className="h-4 w-4" />} label="Score médio" value={m.avgScore.toFixed(1)} sub={classifyScore(m.avgScore).label} />
             <Stat icon={<Trophy className="h-4 w-4" />} label="Tasks estratégicas" value={m.strategic} sub="score ≥ 8.5" />
@@ -194,9 +194,12 @@ function Dashboard() {
 
 function Stat({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: React.ReactNode; sub?: string }) {
   return (
-    <Card className="p-4 border-border/60 shadow-none">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon}{label}</div>
-      <div className="text-2xl font-semibold mt-2 truncate">{value}</div>
+    <Card className="p-4 border-border/70 shadow-[var(--shadow-card)] gap-0">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="grid place-items-center h-6 w-6 rounded-md bg-muted text-foreground/70">{icon}</span>
+        <span className="truncate">{label}</span>
+      </div>
+      <div className="text-2xl font-semibold mt-2.5 truncate tracking-tight">{value}</div>
       {sub && <div className="text-xs text-muted-foreground mt-1 truncate">{sub}</div>}
     </Card>
   );
@@ -204,8 +207,8 @@ function Stat({ icon, label, value, sub }: { icon: React.ReactNode; label: strin
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="p-4 border-border/60 shadow-none">
-      <div className="text-sm font-medium mb-3">{title}</div>
+    <Card className="p-4 sm:p-5 border-border/70 shadow-[var(--shadow-card)] gap-0">
+      <div className="text-sm font-semibold mb-3">{title}</div>
       {children}
     </Card>
   );

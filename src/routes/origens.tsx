@@ -32,21 +32,33 @@ function OrigensPage() {
   return (
     <PageContainer>
       <PageHeader title="Origens do trabalho" subtitle="De onde vem a demanda" />
-      <Card className="p-4 mb-6 border-border/60 shadow-none flex gap-2">
-        <Input placeholder="Nova origem (ex.: Cliente Novo)" value={name} onChange={(e) => setName(e.target.value)} />
-        <Button onClick={add}><Plus className="h-4 w-4 mr-1.5" />Adicionar</Button>
+      <Card className="p-4 mb-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Input
+            placeholder="Nova origem (ex.: Cliente Novo)"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") add(); }}
+          />
+          <Button onClick={add} className="sm:shrink-0"><Plus className="h-4 w-4 mr-1.5" />Adicionar</Button>
+        </div>
       </Card>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        {origins.length === 0 && (
+          <div className="col-span-full text-sm text-muted-foreground text-center py-8 border border-dashed border-border rounded-lg">
+            Nenhuma origem cadastrada ainda.
+          </div>
+        )}
         {origins.map((o) => {
           const count = tasks.filter((t) => t.work_origin_id === o.id).length;
           return (
-            <Card key={o.id} className="p-4 border-border/60 shadow-none">
+            <Card key={o.id} className="p-4 border-border/70 shadow-[var(--shadow-card)] gap-0 hover:border-primary/40 transition-colors">
               <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: o.color ?? "#6366f1" }} />
-                <div className="font-medium">{o.name}</div>
+                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: o.color ?? "#6366f1" }} />
+                <div className="font-medium truncate">{o.name}</div>
               </div>
-              <div className="text-xs text-muted-foreground mt-2">{count} tasks</div>
-              <Badge variant="secondary" className="mt-3 text-[10px]">{count > 0 ? "ativa" : "sem tasks"}</Badge>
+              <div className="text-xs text-muted-foreground mt-2 tabular-nums">{count} tasks</div>
+              <Badge variant={count > 0 ? "secondary" : "outline"} className="mt-3 text-[10px]">{count > 0 ? "ativa" : "sem tasks"}</Badge>
             </Card>
           );
         })}
