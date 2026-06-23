@@ -46,6 +46,33 @@ function pick(row: Record<string, string>, ...keys: string[]) {
   return "";
 }
 
+function normalizeDate(value: string) {
+  const raw = value.trim();
+  if (!raw) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+
+  const brMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (brMatch) {
+    const [, day, month, year] = brMatch;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  const slashIsoMatch = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  if (slashIsoMatch) {
+    const [, year, month, day] = slashIsoMatch;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return raw;
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function ImportPage() {
   const { data: origins = [] } = useWorkOrigins();
   const { data: sources = [] } = useDataSources();
@@ -78,8 +105,8 @@ function ImportPage() {
         task_type: pick(r, "type", "tipo") || null,
         status: pick(r, "status") || "todo",
         priority: pick(r, "priority", "prioridade") || "medium",
-        task_date: pick(r, "date", "data", "task_date") || null,
-        deadline: pick(r, "deadline", "prazo") || null,
+        task_date: normalizeDate(pick(r, "date", "data", "task_date")),
+        deadline: normalizeDate(pick(r, "deadline", "prazo")),
         estimated_time: Number(pick(r, "estimated_time", "estimativa")) || null,
         actual_time: Number(pick(r, "actual_time", "tempo")) || null,
       }));
