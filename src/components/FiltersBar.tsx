@@ -26,6 +26,7 @@ export function FiltersBar({
 
   const activeCount =
     (filters.period !== "all" ? 1 : 0) +
+    (filters.sortDate !== "desc" ? 1 : 0) +
     (filters.work_origin_id ? 1 : 0) +
     (filters.data_source_id ? 1 : 0) +
     (filters.project_id ? 1 : 0) +
@@ -56,7 +57,7 @@ export function FiltersBar({
           )}
         </div>
         <CollapsibleContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 mt-3">
             <FilterItem label="Período">
               <Select value={filters.period} onValueChange={(v) => update({ period: v as Filters["period"] })}>
                 <SelectTrigger><SelectValue placeholder="Período" /></SelectTrigger>
@@ -65,6 +66,19 @@ export function FiltersBar({
                   <SelectItem value="7d">Últimos 7 dias</SelectItem>
                   <SelectItem value="30d">Últimos 30 dias</SelectItem>
                   <SelectItem value="90d">Últimos 90 dias</SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterItem>
+
+            <FilterItem label="Ordem da data">
+              <Select
+                value={filters.sortDate}
+                onValueChange={(v) => update({ sortDate: v as Filters["sortDate"] })}
+              >
+                <SelectTrigger><SelectValue placeholder="Ordenação" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Mais recentes primeiro</SelectItem>
+                  <SelectItem value="asc">Mais antigas primeiro</SelectItem>
                 </SelectContent>
               </Select>
             </FilterItem>

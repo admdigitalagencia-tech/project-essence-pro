@@ -4,6 +4,7 @@ import { AREAS, PRIORITIES, STATUSES } from "./constants";
 
 export type Filters = {
   period: "all" | "7d" | "30d" | "90d";
+  sortDate: "desc" | "asc";
   work_origin_id: string;
   data_source_id: string;
   project_id: string;
@@ -16,6 +17,7 @@ export type Filters = {
 
 export const initialFilters: Filters = {
   period: "all",
+  sortDate: "desc",
   work_origin_id: "",
   data_source_id: "",
   project_id: "",
@@ -53,6 +55,10 @@ export function applyFilters(tasks: Task[], f: Filters): Task[] {
     if (f.impactMin && (t.impact ?? 0) < f.impactMin) return false;
     if (f.complexityMin && (t.complexity ?? 0) < f.complexityMin) return false;
     return true;
+  }).sort((a, b) => {
+    const left = new Date(a.task_date ?? a.created_at).getTime();
+    const right = new Date(b.task_date ?? b.created_at).getTime();
+    return f.sortDate === "asc" ? left - right : right - left;
   });
 }
 
