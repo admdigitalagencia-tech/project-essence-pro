@@ -9,20 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as ProjetosRouteImport } from './routes/projetos'
 import { Route as OrigensRouteImport } from './routes/origens'
 import { Route as ImportacoesRouteImport } from './routes/importacoes'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TasksIndexRouteImport } from './routes/tasks.index'
 import { Route as TasksNovaRouteImport } from './routes/tasks.nova'
 
-const TasksRoute = TasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
@@ -53,10 +48,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TasksIndexRoute = TasksIndexRouteImport.update({
+  id: '/tasks/',
+  path: '/tasks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksNovaRoute = TasksNovaRouteImport.update({
-  id: '/nova',
-  path: '/nova',
-  getParentRoute: () => TasksRoute,
+  id: '/tasks/nova',
+  path: '/tasks/nova',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -66,8 +66,8 @@ export interface FileRoutesByFullPath {
   '/origens': typeof OrigensRoute
   '/projetos': typeof ProjetosRoute
   '/relatorios': typeof RelatoriosRoute
-  '/tasks': typeof TasksRouteWithChildren
   '/tasks/nova': typeof TasksNovaRoute
+  '/tasks/': typeof TasksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -76,8 +76,8 @@ export interface FileRoutesByTo {
   '/origens': typeof OrigensRoute
   '/projetos': typeof ProjetosRoute
   '/relatorios': typeof RelatoriosRoute
-  '/tasks': typeof TasksRouteWithChildren
   '/tasks/nova': typeof TasksNovaRoute
+  '/tasks': typeof TasksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -87,8 +87,8 @@ export interface FileRoutesById {
   '/origens': typeof OrigensRoute
   '/projetos': typeof ProjetosRoute
   '/relatorios': typeof RelatoriosRoute
-  '/tasks': typeof TasksRouteWithChildren
   '/tasks/nova': typeof TasksNovaRoute
+  '/tasks/': typeof TasksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,8 +99,8 @@ export interface FileRouteTypes {
     | '/origens'
     | '/projetos'
     | '/relatorios'
-    | '/tasks'
     | '/tasks/nova'
+    | '/tasks/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,8 +109,8 @@ export interface FileRouteTypes {
     | '/origens'
     | '/projetos'
     | '/relatorios'
-    | '/tasks'
     | '/tasks/nova'
+    | '/tasks'
   id:
     | '__root__'
     | '/'
@@ -119,8 +119,8 @@ export interface FileRouteTypes {
     | '/origens'
     | '/projetos'
     | '/relatorios'
-    | '/tasks'
     | '/tasks/nova'
+    | '/tasks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,18 +130,12 @@ export interface RootRouteChildren {
   OrigensRoute: typeof OrigensRoute
   ProjetosRoute: typeof ProjetosRoute
   RelatoriosRoute: typeof RelatoriosRoute
-  TasksRoute: typeof TasksRouteWithChildren
+  TasksNovaRoute: typeof TasksNovaRoute
+  TasksIndexRoute: typeof TasksIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tasks': {
-      id: '/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/relatorios': {
       id: '/relatorios'
       path: '/relatorios'
@@ -184,25 +178,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tasks/': {
+      id: '/tasks/'
+      path: '/tasks'
+      fullPath: '/tasks/'
+      preLoaderRoute: typeof TasksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks/nova': {
       id: '/tasks/nova'
-      path: '/nova'
+      path: '/tasks/nova'
       fullPath: '/tasks/nova'
       preLoaderRoute: typeof TasksNovaRouteImport
-      parentRoute: typeof TasksRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface TasksRouteChildren {
-  TasksNovaRoute: typeof TasksNovaRoute
-}
-
-const TasksRouteChildren: TasksRouteChildren = {
-  TasksNovaRoute: TasksNovaRoute,
-}
-
-const TasksRouteWithChildren = TasksRoute._addFileChildren(TasksRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -211,18 +202,9 @@ const rootRouteChildren: RootRouteChildren = {
   OrigensRoute: OrigensRoute,
   ProjetosRoute: ProjetosRoute,
   RelatoriosRoute: RelatoriosRoute,
-  TasksRoute: TasksRouteWithChildren,
+  TasksNovaRoute: TasksNovaRoute,
+  TasksIndexRoute: TasksIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

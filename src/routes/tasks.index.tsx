@@ -14,7 +14,7 @@ import { db } from "@/lib/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/tasks")({
+export const Route = createFileRoute("/tasks/")({
   head: () => ({ meta: [{ title: "Tasks · Lucas Productivity OS" }] }),
   component: TasksPage,
 });
