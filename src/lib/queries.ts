@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { db, type Task, type WorkOrigin, type Project, type DataSource } from "./db";
+import { db, type Task, type WorkOrigin, type Project, type DataSource, type Platform } from "./db";
 
 export function useWorkOrigins() {
   return useQuery<WorkOrigin[]>({
@@ -28,6 +28,17 @@ export function useProjects() {
     queryKey: ["projects"],
     queryFn: async () => {
       const { data, error } = await db.from("projects").select("*").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function usePlatforms() {
+  return useQuery<Platform[]>({
+    queryKey: ["platforms"],
+    queryFn: async () => {
+      const { data, error } = await db.from("platforms").select("*").order("name");
       if (error) throw error;
       return data ?? [];
     },

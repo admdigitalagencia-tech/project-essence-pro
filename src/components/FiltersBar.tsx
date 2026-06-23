@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { type Filters } from "@/lib/filters";
-import { AREAS, PRIORITIES, STATUSES, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/constants";
+import { TASK_CATEGORIES, PRIORITIES, STATUSES, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/constants";
 import { useWorkOrigins, useDataSources, useProjects } from "@/lib/queries";
 
 const ANY = "__any__";
@@ -113,12 +113,12 @@ export function FiltersBar({
               </Select>
             </FilterItem>
 
-            <FilterItem label="Área">
+            <FilterItem label="Tipo">
               <Select value={sel(filters.area)} onValueChange={onChange("area")}>
-                <SelectTrigger><SelectValue placeholder="Área" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={ANY}>Todas áreas</SelectItem>
-                  {AREAS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                  <SelectItem value={ANY}>Todos tipos</SelectItem>
+                  {TASK_CATEGORIES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
                 </SelectContent>
               </Select>
             </FilterItem>

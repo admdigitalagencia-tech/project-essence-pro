@@ -133,7 +133,7 @@ function Dashboard() {
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Tasks por área">
+            <ChartCard title="Tasks por tipo">
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={m.byArea}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />

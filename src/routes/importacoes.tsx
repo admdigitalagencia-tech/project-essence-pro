@@ -101,7 +101,7 @@ function ImportPage() {
         data_source_id: source,
         title: pick(r, "title", "titulo", "task", "name") || "(sem título)",
         description: pick(r, "description", "descricao", "notes") || null,
-        area: pick(r, "area") || null,
+        area: pick(r, "area", "tipo") || null,
         task_type: pick(r, "type", "tipo") || null,
         status: pick(r, "status") || "todo",
         priority: pick(r, "priority", "prioridade") || "medium",
@@ -200,7 +200,7 @@ function ImportPage() {
         <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0 h-fit">
           <div className="text-sm font-semibold mb-3">Colunas aceitas</div>
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {["title", "description", "area", "type", "status", "priority", "date", "deadline", "estimated_time", "actual_time"].map((c) => (
+            {["title", "description", "tipo", "type", "status", "priority", "date", "deadline", "estimated_time", "actual_time"].map((c) => (
               <span key={c} className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-muted text-foreground/80">{c}</span>
             ))}
           </div>

@@ -112,7 +112,7 @@ function ReportCard({ title, tasks, projects }: { title: string; tasks: any[]; p
             <ul className="space-y-1.5 text-sm">{topProjects.map((p, i) => <li key={i} className="flex justify-between"><span className="truncate">{p.name}</span><span className="text-muted-foreground">{p.count}</span></li>)}</ul>
           }
         </Section>
-        <Section title="Áreas mais trabalhadas">
+        <Section title="Tipos mais trabalhados">
           {topAreas.length === 0 ? <Muted>—</Muted> :
             <ul className="space-y-1.5 text-sm">{topAreas.map(([a, c]) => <li key={a} className="flex justify-between"><span className="truncate">{a}</span><span className="text-muted-foreground">{c}</span></li>)}</ul>
           }

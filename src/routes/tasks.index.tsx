@@ -9,9 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Search, Trash2 } from "lucide-react";
 import { useFilters, applyFilters } from "@/lib/filters";
-import { useTasks, useWorkOrigins, useProjects, useDataSources } from "@/lib/queries";
+import { useTasks, useWorkOrigins, useProjects, useDataSources, usePlatforms } from "@/lib/queries";
 import {
-  AREAS,
+  TASK_CATEGORIES,
   PRIORITIES,
   PRIORITY_LABELS,
   STATUSES,
@@ -52,6 +52,7 @@ const NONE = "__none__";
 type EditableTaskFields = {
   title: string;
   work_origin_id: string;
+  platform_id: string;
   project_id: string;
   area: string;
   status: string;
@@ -64,6 +65,7 @@ function TasksPage() {
   const { data: tasks = [], isLoading } = useTasks();
   const { data: origins = [] } = useWorkOrigins();
   const { data: sources = [] } = useDataSources();
+  const { data: platforms = [] } = usePlatforms();
   const { data: projects = [] } = useProjects();
   const [q, setQ] = useState("");
   const [drafts, setDrafts] = useState<Record<string, EditableTaskFields>>({});
@@ -73,8 +75,9 @@ function TasksPage() {
   const lookup = useMemo(() => ({
     origin: Object.fromEntries(origins.map((o) => [o.id, o])),
     source: Object.fromEntries(sources.map((s) => [s.id, s])),
+    platform: Object.fromEntries(platforms.map((p) => [p.id, p])),
     project: Object.fromEntries(projects.map((p) => [p.id, p])),
-  }), [origins, sources, projects]);
+  }), [origins, sources, platforms, projects]);
 
   const filtered = useMemo(() => {
     const list = applyFilters(tasks, filters);
@@ -93,6 +96,7 @@ function TasksPage() {
         next[task.id] = current[task.id] ?? {
           title: task.title,
           work_origin_id: task.work_origin_id ?? "",
+          platform_id: task.platform_id ?? "",
           project_id: task.project_id ?? "",
           area: task.area ?? "",
           status: task.status,
@@ -140,6 +144,7 @@ function TasksPage() {
       .update({
         title,
         work_origin_id: nextDraft.work_origin_id || null,
+        platform_id: nextDraft.platform_id || null,
         project_id: nextDraft.project_id || null,
         area: nextDraft.area || null,
         status: nextDraft.status,
@@ -198,8 +203,9 @@ function TasksPage() {
               <tr>
                 <th className="text-left px-4 py-3 font-semibold">Título</th>
                 <th className="text-left px-3 py-3 font-semibold">Origem</th>
+                <th className="text-left px-3 py-3 font-semibold">Plataforma</th>
                 <th className="text-left px-3 py-3 font-semibold">Projeto</th>
-                <th className="text-left px-3 py-3 font-semibold">Área</th>
+                <th className="text-left px-3 py-3 font-semibold">Tipo</th>
                 <th className="text-left px-3 py-3 font-semibold">Status</th>
                 <th className="text-left px-3 py-3 font-semibold">Prio.</th>
                 <th className="text-right px-3 py-3 font-semibold">Score</th>
@@ -208,9 +214,9 @@ function TasksPage() {
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">Carregando…</td></tr>}
+              {isLoading && <tr><td colSpan={10} className="p-8 text-center text-muted-foreground">Carregando…</td></tr>}
               {!isLoading && filtered.length === 0 && (
-                <tr><td colSpan={9} className="p-10 text-center text-muted-foreground">Nenhuma task encontrada.</td></tr>
+                <tr><td colSpan={10} className="p-10 text-center text-muted-foreground">Nenhuma task encontrada.</td></tr>
               )}
               {filtered.map((t) => {
                 const c = classifyScore(t.quality_score ?? 0);
@@ -227,6 +233,24 @@ function TasksPage() {
                         className="h-9 border-0 bg-transparent px-0 text-sm font-medium shadow-none focus-visible:ring-0"
                       />
                       {t.description && <div className="text-xs text-muted-foreground line-clamp-1">{t.description}</div>}
+                    </td>
+                    <td className="px-3 py-3">
+                      <CompactSelect
+                        value={draft.platform_id || NONE}
+                        placeholder="Selecionar"
+                        onValueChange={(value) => {
+                          const nextValue = value === NONE ? "" : value;
+                          patchDraft(t.id, { platform_id: nextValue });
+                          void saveTask(t.id, { platform_id: nextValue });
+                        }}
+                      >
+                        <SelectItem value={NONE}>Sem plataforma</SelectItem>
+                        {platforms.map((platform) => (
+                          <SelectItem key={platform.id} value={platform.id}>
+                            {platform.name}
+                          </SelectItem>
+                        ))}
+                      </CompactSelect>
                     </td>
                     <td className="px-3 py-3">
                       <CompactSelect
@@ -278,8 +302,8 @@ function TasksPage() {
                           void saveTask(t.id, { area: nextValue });
                         }}
                       >
-                        <SelectItem value={NONE}>Sem área</SelectItem>
-                        {AREAS.map((area) => (
+                        <SelectItem value={NONE}>Sem tipo</SelectItem>
+                        {TASK_CATEGORIES.map((area) => (
                           <SelectItem key={area} value={area}>
                             {area}
                           </SelectItem>

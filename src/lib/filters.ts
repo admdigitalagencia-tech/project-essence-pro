@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Task } from "./db";
-import { AREAS, PRIORITIES, STATUSES } from "./constants";
+import { TASK_CATEGORIES, PRIORITIES, STATUSES } from "./constants";
 
 export type Filters = {
   period: "all" | "7d" | "30d" | "90d";
@@ -62,4 +62,4 @@ export function applyFilters(tasks: Task[], f: Filters): Task[] {
   });
 }
 
-export { AREAS, PRIORITIES, STATUSES };
+export { TASK_CATEGORIES, PRIORITIES, STATUSES };

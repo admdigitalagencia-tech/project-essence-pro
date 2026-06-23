@@ -1,4 +1,4 @@
-export const AREAS = [
+export const TASK_CATEGORIES = [
   "Google Ads", "Meta Ads", "Tracking & Mensuração", "CRM & Leads",
   "Relatórios & Análise", "Criativos & Conteúdo", "Landing Pages",
   "Estratégia", "Comercial/Vendas", "Produto/SaaS", "Automação/IA",

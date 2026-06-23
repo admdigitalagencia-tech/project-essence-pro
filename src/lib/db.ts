@@ -8,6 +8,7 @@ export const db = supabase as unknown as {
 
 export type WorkOrigin = { id: string; name: string; color: string | null };
 export type DataSource = { id: string; name: string };
+export type Platform = { id: string; name: string };
 export type Project = {
   id: string; name: string; client: string | null;
   work_origin_id: string | null; status: string | null; notes: string | null;
@@ -16,6 +17,7 @@ export type Task = {
   id: string;
   work_origin_id: string | null;
   data_source_id: string | null;
+  platform_id: string | null;
   project_id: string | null;
   title: string;
   description: string | null;

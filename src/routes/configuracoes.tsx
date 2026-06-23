@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageContainer, PageHeader } from "@/components/PageLayout";
 import { Card } from "@/components/ui/card";
 import { useWorkOrigins, useDataSources } from "@/lib/queries";
-import { AREAS, TASK_TYPES } from "@/lib/constants";
+import { TASK_CATEGORIES, TASK_TYPES } from "@/lib/constants";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações · Lucas Productivity OS" }] }),
@@ -19,7 +19,7 @@ function ConfigPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <ListCard title="Origens do trabalho" items={origins.map((o) => o.name)} />
         <ListCard title="Fontes de dados" items={sources.map((s) => s.name)} />
-        <ListCard title="Áreas" items={[...AREAS]} />
+        <ListCard title="Tipos" items={[...TASK_CATEGORIES]} />
         <ListCard title="Tipos de task" items={[...TASK_TYPES]} />
       </div>
 

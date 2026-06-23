@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useWorkOrigins, useDataSources, useProjects } from "@/lib/queries";
-import { AREAS, TASK_TYPES, STATUSES, STATUS_LABELS, PRIORITIES, PRIORITY_LABELS, classifyScore } from "@/lib/constants";
+import { useWorkOrigins, useDataSources, usePlatforms, useProjects } from "@/lib/queries";
+import { TASK_CATEGORIES, TASK_TYPES, STATUSES, STATUS_LABELS, PRIORITIES, PRIORITY_LABELS, classifyScore } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -26,10 +26,11 @@ function NovaTask() {
   const qc = useQueryClient();
   const { data: origins = [] } = useWorkOrigins();
   const { data: sources = [] } = useDataSources();
+  const { data: platforms = [] } = usePlatforms();
   const { data: projects = [] } = useProjects();
 
   const [f, setF] = useState({
-    work_origin_id: "", data_source_id: "", project_id: "",
+    work_origin_id: "", data_source_id: "", platform_id: "", project_id: "",
     title: "", description: "", area: "", channel: "", task_type: "",
     status: "todo", priority: "medium",
     impact: 5, complexity: 5, strategic_relevance: 5, urgency: 5, evidence_score: 5,
@@ -54,6 +55,7 @@ function NovaTask() {
     const payload = {
       work_origin_id: f.work_origin_id || null,
       data_source_id: f.data_source_id || null,
+      platform_id: f.platform_id || null,
       project_id: f.project_id || null,
       title: f.title.trim(),
       description: f.description || null,
@@ -97,7 +99,7 @@ function NovaTask() {
             <Field label="Título" required>
               <Input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Ex.: Otimizar campanha Performance Max" required />
             </Field>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mt-4">
               <Field label="Origem do trabalho">
                 <Select value={selVal(f.work_origin_id)} onValueChange={(v) => set("work_origin_id", fromSel(v))}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -116,6 +118,15 @@ function NovaTask() {
                   </SelectContent>
                 </Select>
               </Field>
+              <Field label="Plataforma">
+                <Select value={selVal(f.platform_id)} onValueChange={(v) => set("platform_id", fromSel(v))}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>—</SelectItem>
+                    {platforms.map((platform) => <SelectItem key={platform.id} value={platform.id}>{platform.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
               <Field label="Projeto/Cliente">
                 <Select value={selVal(f.project_id)} onValueChange={(v) => set("project_id", fromSel(v))}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -131,12 +142,12 @@ function NovaTask() {
           <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
             <SectionTitle>Classificação</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Field label="Área">
+              <Field label="Tipo">
                 <Select value={selVal(f.area)} onValueChange={(v) => set("area", fromSel(v))}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>—</SelectItem>
-                    {AREAS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                    {TASK_CATEGORIES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </Field>
