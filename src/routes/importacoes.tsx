@@ -21,7 +21,7 @@ import {
   buildImportPreview,
   buildTaskPayload,
   getValidationMessage,
-  parseCSV,
+  parseImportFile,
   type ImportPreviewRow,
 } from "@/lib/imports";
 
@@ -40,15 +40,22 @@ function ImportPage() {
   const [source, setSource] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ImportPreviewRow[]>([]);
+  const [formatLabel, setFormatLabel] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function onFile(f: File | null) {
     setFile(f);
     setPreview([]);
+    setFormatLabel("");
     if (!f) return;
-    const text = await f.text();
-    const rows = parseCSV(text);
-    setPreview(buildImportPreview(rows).prepared.slice(0, 8));
+    try {
+      const parsed = await parseImportFile(f);
+      setFormatLabel(parsed.formatLabel);
+      setPreview(buildImportPreview(parsed.rows).prepared.slice(0, 8));
+    } catch (error) {
+      setFile(null);
+      toast.error(getValidationMessage(error));
+    }
   }
 
   async function doImport() {
@@ -58,7 +65,7 @@ function ImportPage() {
     }
     setBusy(true);
     try {
-      const rows = parseCSV(await file.text());
+      const { rows } = await parseImportFile(file);
       const validTasks = [];
       const invalidRows: Array<{ rowNumber: number; reason: string }> = [];
 
@@ -112,6 +119,7 @@ function ImportPage() {
       qc.invalidateQueries({ queryKey: ["imports"] });
       setFile(null);
       setPreview([]);
+      setFormatLabel("");
     } catch (e: any) {
       toast.error(e.message ?? "Falha na importação");
     } finally {
@@ -125,7 +133,10 @@ function ImportPage() {
 
   return (
     <PageContainer>
-      <PageHeader title="Importações" subtitle="Importe CSV ou cadastre manualmente" />
+      <PageHeader
+        title="Importações"
+        subtitle="Importe CSV, Excel, TSV, TXT ou JSON, ou cadastre manualmente"
+      />
       <Card className="p-6 border-border/60 shadow-none space-y-4 max-w-3xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1.5">
@@ -162,17 +173,26 @@ function ImportPage() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Arquivo CSV</Label>
+          <Label className="text-xs text-muted-foreground">Arquivo de importação</Label>
           <Input
             type="file"
-            accept=".csv,text/csv"
+            accept=".csv,.tsv,.txt,.json,.xlsx,.xls,text/csv,text/tab-separated-values,application/json,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             onChange={(e) => onFile(e.target.files?.[0] ?? null)}
           />
+          <p className="text-xs text-muted-foreground">
+            Formatos aceitos: CSV, XLSX, XLS, TSV, TXT e JSON.
+          </p>
           <p className="text-xs text-muted-foreground">
             Colunas aceitas: title, description, area, type, status, priority, date, deadline,
             estimated_time, actual_time, impact, complexity, strategic_relevance, urgency,
             evidence_score
           </p>
+          {file && formatLabel ? (
+            <p className="text-xs text-muted-foreground">
+              Arquivo selecionado: <span className="font-medium text-foreground">{file.name}</span>{" "}
+              · Formato detectado: {formatLabel}
+            </p>
+          ) : null}
         </div>
 
         {preview.length > 0 && (

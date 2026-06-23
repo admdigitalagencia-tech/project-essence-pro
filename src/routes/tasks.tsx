@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -68,6 +68,7 @@ type EditableTaskForm = {
 };
 
 function TasksPage() {
+  const navigate = useNavigate();
   const { filters, update, reset } = useFilters();
   const { data: tasks = [], isLoading } = useTasks();
   const { data: origins = [] } = useWorkOrigins();
@@ -261,11 +262,9 @@ function TasksPage() {
         title="Tasks"
         subtitle="Todas as tasks de todas as origens"
         action={
-          <Button asChild>
-            <Link to="/tasks/nova">
-              <Plus className="h-4 w-4 mr-1.5" />
-              Nova task
-            </Link>
+          <Button type="button" onClick={() => navigate({ to: "/tasks/nova" })}>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Nova task
           </Button>
         }
       />

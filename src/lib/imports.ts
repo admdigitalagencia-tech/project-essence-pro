@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import * as XLSX from "xlsx";
 import { parseTaskInsert, type TaskFormValues } from "./task-schema";
 
 export type ImportPreviewRow = {
@@ -7,6 +8,11 @@ export type ImportPreviewRow = {
   normalizedTitle: string;
   status: "valid" | "invalid";
   error?: string;
+};
+
+export type ParsedImportData = {
+  rows: Record<string, string>[];
+  formatLabel: string;
 };
 
 const STATUS_ALIASES: Record<string, TaskFormValues["status"]> = {
@@ -41,44 +47,41 @@ const PRIORITY_ALIASES: Record<string, TaskFormValues["priority"]> = {
 };
 
 export function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
-  if (lines.length < 2) return [];
+  return parseDelimitedText(text, ",");
+}
 
-  const split = (line: string) => {
-    const out: string[] = [];
-    let current = "";
-    let inQuotes = false;
+export async function parseImportFile(file: File): Promise<ParsedImportData> {
+  const extension = getFileExtension(file.name);
 
-    for (let i = 0; i < line.length; i += 1) {
-      const char = line[i];
-      if (char === '"') {
-        if (inQuotes && line[i + 1] === '"') {
-          current += '"';
-          i += 1;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === "," && !inQuotes) {
-        out.push(current);
-        current = "";
-      } else {
-        current += char;
-      }
-    }
+  if (extension === "csv") {
+    return {
+      rows: parseDelimitedText(await file.text(), ","),
+      formatLabel: "CSV",
+    };
+  }
 
-    out.push(current);
-    return out.map((value) => value.trim());
-  };
+  if (extension === "tsv" || extension === "txt") {
+    return {
+      rows: parseDelimitedText(await file.text(), "\t"),
+      formatLabel: extension === "tsv" ? "TSV" : "TXT",
+    };
+  }
 
-  const headers = split(lines[0]).map((header) => normalizeKey(header));
-  return lines.slice(1).map((line) => {
-    const cols = split(line);
-    const row: Record<string, string> = {};
-    headers.forEach((header, index) => {
-      row[header] = cols[index] ?? "";
-    });
-    return row;
-  });
+  if (extension === "json") {
+    return {
+      rows: parseJSON(await file.text()),
+      formatLabel: "JSON",
+    };
+  }
+
+  if (extension === "xlsx" || extension === "xls") {
+    return {
+      rows: parseSpreadsheet(await file.arrayBuffer()),
+      formatLabel: extension.toUpperCase(),
+    };
+  }
+
+  throw new Error("Formato não suportado. Use CSV, XLSX, XLS, TSV, TXT ou JSON");
 }
 
 export function buildImportPreview(rows: Record<string, string>[]) {
@@ -159,6 +162,94 @@ function normalizeKey(value: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, "_");
+}
+
+function parseDelimitedText(text: string, delimiter: "," | "\t") {
+  const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  if (lines.length < 2) return [];
+
+  const split = (line: string) => {
+    const out: string[] = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i += 1) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === delimiter && !inQuotes) {
+        out.push(current);
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+
+    out.push(current);
+    return out.map((value) => value.trim());
+  };
+
+  const headers = split(lines[0]).map((header) => normalizeKey(header));
+  return lines.slice(1).map((line) => {
+    const cols = split(line);
+    const row: Record<string, string> = {};
+    headers.forEach((header, index) => {
+      row[header] = cols[index] ?? "";
+    });
+    return row;
+  });
+}
+
+function parseJSON(text: string) {
+  const parsed = JSON.parse(text);
+  const inputRows = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.rows) ? parsed.rows : null;
+
+  if (!inputRows) {
+    throw new Error("JSON inválido. Use um array de objetos ou um objeto com a chave rows");
+  }
+
+  return inputRows.map((row) => normalizeObjectRow(row));
+}
+
+function parseSpreadsheet(buffer: ArrayBuffer) {
+  const workbook = XLSX.read(buffer, { type: "array", cellDates: false });
+  const firstSheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[firstSheetName];
+
+  if (!sheet) return [];
+
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+    defval: "",
+    raw: false,
+  });
+
+  return rows.map((row) => normalizeObjectRow(row));
+}
+
+function normalizeObjectRow(input: unknown) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("Estrutura inválida no arquivo importado");
+  }
+
+  return Object.fromEntries(
+    Object.entries(input).map(([key, value]) => [normalizeKey(key), stringifyCell(value)]),
+  );
+}
+
+function stringifyCell(value: unknown) {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value.trim();
+  return String(value).trim();
+}
+
+function getFileExtension(filename: string) {
+  const parts = filename.toLowerCase().split(".");
+  return parts.length > 1 ? parts.at(-1) ?? "" : "";
 }
 
 function normalizeStatus(value: string): TaskFormValues["status"] {

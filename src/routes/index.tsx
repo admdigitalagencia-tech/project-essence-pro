@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { PageContainer, PageHeader } from "@/components/PageLayout";
 import { FiltersBar } from "@/components/FiltersBar";
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/")({
 const CHART_COLORS = ["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4","#ec4899","#84cc16"];
 
 function Dashboard() {
+  const navigate = useNavigate();
   const { filters, update, reset } = useFilters();
   const { data: tasks = [], isLoading } = useTasks();
   const { data: origins = [] } = useWorkOrigins();
@@ -82,8 +83,8 @@ function Dashboard() {
         title="Dashboard Global"
         subtitle="Visão consolidada de toda a sua produtividade"
         action={
-          <Button asChild>
-            <Link to="/tasks/nova"><Plus className="h-4 w-4 mr-1.5" /> Nova task</Link>
+          <Button type="button" onClick={() => navigate({ to: "/tasks/nova" })}>
+            <Plus className="h-4 w-4 mr-1.5" /> Nova task
           </Button>
         }
       />
@@ -219,7 +220,10 @@ function EmptyState() {
         Comece cadastrando uma task manualmente ou importando um CSV.
       </p>
       <div className="flex justify-center gap-2">
-        <Button asChild><Link to="/tasks/nova"><Plus className="h-4 w-4 mr-1.5" />Nova task</Link></Button>
+        <Button type="button" onClick={() => navigate({ to: "/tasks/nova" })}>
+          <Plus className="h-4 w-4 mr-1.5" />
+          Nova task
+        </Button>
         <Button asChild variant="outline"><Link to="/importacoes">Importar CSV</Link></Button>
       </div>
     </Card>
