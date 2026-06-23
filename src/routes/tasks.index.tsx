@@ -198,18 +198,18 @@ function TasksPage() {
 
         {/* Desktop table */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[1760px] text-sm">
             <thead className="bg-muted/50 text-[11px] uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="text-left px-4 py-3 font-semibold">Título</th>
-                <th className="text-left px-3 py-3 font-semibold">Origem</th>
-                <th className="text-left px-3 py-3 font-semibold">Plataforma</th>
-                <th className="text-left px-3 py-3 font-semibold">Projeto</th>
-                <th className="text-left px-3 py-3 font-semibold">Tipo</th>
-                <th className="text-left px-3 py-3 font-semibold">Status</th>
-                <th className="text-left px-3 py-3 font-semibold">Prio.</th>
-                <th className="text-right px-3 py-3 font-semibold">Score</th>
-                <th className="text-left px-3 py-3 font-semibold">Data</th>
+                <th className="text-left px-6 py-4 font-semibold w-[520px]">Task</th>
+                <th className="text-left px-4 py-4 font-semibold w-[170px]">Origem</th>
+                <th className="text-left px-4 py-4 font-semibold w-[170px]">Plataforma</th>
+                <th className="text-left px-4 py-4 font-semibold w-[190px]">Projeto</th>
+                <th className="text-left px-4 py-4 font-semibold w-[190px]">Tipo</th>
+                <th className="text-left px-4 py-4 font-semibold w-[160px]">Status</th>
+                <th className="text-left px-4 py-4 font-semibold w-[140px]">Prio.</th>
+                <th className="text-right px-4 py-4 font-semibold w-[90px]">Score</th>
+                <th className="text-left px-4 py-4 font-semibold w-[170px]">Data</th>
                 <th className="w-10"></th>
               </tr>
             </thead>
@@ -224,17 +224,23 @@ function TasksPage() {
                 const saving = savingIds.includes(t.id);
                 if (!draft) return null;
                 return (
-                  <tr key={t.id} className="border-t border-border/60 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 min-w-[240px] max-w-[360px]">
+                  <tr key={t.id} className="border-t border-border/60 align-top hover:bg-muted/30 transition-colors">
+                    <td className="px-6 py-5">
                       <Input
                         value={draft.title}
                         onChange={(e) => patchDraft(t.id, { title: e.target.value })}
                         onBlur={() => saveTask(t.id)}
-                        className="h-9 border-0 bg-transparent px-0 text-sm font-medium shadow-none focus-visible:ring-0"
+                        className="h-auto min-h-9 border-0 bg-transparent px-0 py-0 text-[15px] font-semibold leading-snug shadow-none focus-visible:ring-0"
                       />
-                      {t.description && <div className="text-xs text-muted-foreground line-clamp-1">{t.description}</div>}
+                      {t.description ? (
+                        <p className="mt-2 max-w-[500px] whitespace-normal text-xs leading-relaxed text-muted-foreground line-clamp-3">
+                          {t.description}
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs italic text-muted-foreground/70">Sem descrição registrada</p>
+                      )}
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-5">
                       <CompactSelect
                         value={draft.work_origin_id || NONE}
                         placeholder="Selecionar"
@@ -252,7 +258,7 @@ function TasksPage() {
                         ))}
                       </CompactSelect>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-5">
                       <CompactSelect
                         value={draft.platform_id || NONE}
                         placeholder="Selecionar"
@@ -270,7 +276,7 @@ function TasksPage() {
                         ))}
                       </CompactSelect>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-5">
                       <CompactSelect
                         value={draft.project_id || NONE}
                         placeholder="Selecionar"
@@ -289,10 +295,10 @@ function TasksPage() {
                             <SelectItem key={project.id} value={project.id}>
                               {project.name}
                             </SelectItem>
-                          ))}
+                        ))}
                       </CompactSelect>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-5">
                       <CompactSelect
                         value={draft.area || NONE}
                         placeholder="Selecionar"
@@ -310,7 +316,7 @@ function TasksPage() {
                         ))}
                       </CompactSelect>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-5">
                       <CompactSelect
                         value={draft.status}
                         placeholder="Status"
@@ -327,7 +333,7 @@ function TasksPage() {
                         ))}
                       </CompactSelect>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-4 py-5">
                       <CompactSelect
                         value={draft.priority}
                         placeholder="Prioridade"
@@ -344,12 +350,12 @@ function TasksPage() {
                         ))}
                       </CompactSelect>
                     </td>
-                    <td className="px-3 py-3 text-right">
+                    <td className="px-4 py-5 text-right">
                       <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-semibold tabular-nums ${scoreClasses(c.tone)}`}>
                         {(t.quality_score ?? 0).toFixed(1)}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-xs text-muted-foreground whitespace-nowrap tabular-nums">
+                    <td className="px-4 py-5 text-xs text-muted-foreground whitespace-nowrap tabular-nums">
                       <Input
                         type="date"
                         value={draft.task_date}
@@ -358,7 +364,7 @@ function TasksPage() {
                         className="h-9 min-w-[138px]"
                       />
                     </td>
-                    <td className="px-2 py-3">
+                    <td className="px-3 py-5">
                       <Button
                         size="icon"
                         variant="ghost"
@@ -385,11 +391,15 @@ function TasksPage() {
           {filtered.map((t) => {
             const c = classifyScore(t.quality_score ?? 0);
             return (
-              <div key={t.id} className="p-4 space-y-2.5">
+              <div key={t.id} className="p-4 space-y-3.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-sm truncate">{t.title}</div>
-                    {t.description && <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{t.description}</div>}
+                    <div className="font-semibold text-sm leading-snug">{t.title}</div>
+                    {t.description && (
+                      <div className="mt-1.5 text-xs leading-relaxed text-muted-foreground line-clamp-4">
+                        {t.description}
+                      </div>
+                    )}
                   </div>
                   <span className={`shrink-0 inline-block px-2 py-0.5 rounded-md text-xs font-semibold tabular-nums ${scoreClasses(c.tone)}`}>
                     {(t.quality_score ?? 0).toFixed(1)}
@@ -433,7 +443,7 @@ function CompactSelect({
 }) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={`h-9 min-w-[132px] text-xs ${triggerClassName ?? ""}`}>
+      <SelectTrigger className={`h-10 min-w-[150px] justify-between text-xs ${triggerClassName ?? ""}`}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>{children}</SelectContent>
