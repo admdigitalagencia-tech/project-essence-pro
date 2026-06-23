@@ -45,7 +45,7 @@ function ReportsPage() {
     <PageContainer>
       <PageHeader title="Relatórios" subtitle="Resumos executivos por visão" action={
         <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
-          <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="global">Visão global</SelectItem>
             <SelectItem value="origin">Por origem do trabalho</SelectItem>
@@ -55,8 +55,8 @@ function ReportsPage() {
       } />
       <FiltersBar filters={filters} update={update} reset={reset} />
 
-      <div className="space-y-4">
-        {data.length === 0 && <Card className="p-8 text-center text-muted-foreground">Sem dados para gerar relatório.</Card>}
+      <div className="space-y-4 lg:space-y-6">
+        {data.length === 0 && <Card className="p-10 text-center text-muted-foreground border-dashed">Sem dados para gerar relatório.</Card>}
         {data.map((g) => <ReportCard key={g.label} title={g.label} tasks={g.tasks} projects={projects} />)}
       </div>
     </PageContainer>
