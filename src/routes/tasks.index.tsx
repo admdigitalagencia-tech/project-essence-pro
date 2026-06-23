@@ -236,24 +236,6 @@ function TasksPage() {
                     </td>
                     <td className="px-3 py-3">
                       <CompactSelect
-                        value={draft.platform_id || NONE}
-                        placeholder="Selecionar"
-                        onValueChange={(value) => {
-                          const nextValue = value === NONE ? "" : value;
-                          patchDraft(t.id, { platform_id: nextValue });
-                          void saveTask(t.id, { platform_id: nextValue });
-                        }}
-                      >
-                        <SelectItem value={NONE}>Sem plataforma</SelectItem>
-                        {platforms.map((platform) => (
-                          <SelectItem key={platform.id} value={platform.id}>
-                            {platform.name}
-                          </SelectItem>
-                        ))}
-                      </CompactSelect>
-                    </td>
-                    <td className="px-3 py-3">
-                      <CompactSelect
                         value={draft.work_origin_id || NONE}
                         placeholder="Selecionar"
                         onValueChange={(value) => {
@@ -266,6 +248,24 @@ function TasksPage() {
                         {origins.map((origin) => (
                           <SelectItem key={origin.id} value={origin.id}>
                             {origin.name}
+                          </SelectItem>
+                        ))}
+                      </CompactSelect>
+                    </td>
+                    <td className="px-3 py-3">
+                      <CompactSelect
+                        value={draft.platform_id || NONE}
+                        placeholder="Selecionar"
+                        onValueChange={(value) => {
+                          const nextValue = value === NONE ? "" : value;
+                          patchDraft(t.id, { platform_id: nextValue });
+                          void saveTask(t.id, { platform_id: nextValue });
+                        }}
+                      >
+                        <SelectItem value={NONE}>Sem plataforma</SelectItem>
+                        {platforms.map((platform) => (
+                          <SelectItem key={platform.id} value={platform.id}>
+                            {platform.name}
                           </SelectItem>
                         ))}
                       </CompactSelect>
