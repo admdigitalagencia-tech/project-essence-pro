@@ -194,9 +194,12 @@ function Dashboard() {
 
 function Stat({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: React.ReactNode; sub?: string }) {
   return (
-    <Card className="p-4 border-border/60 shadow-none">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">{icon}{label}</div>
-      <div className="text-2xl font-semibold mt-2 truncate">{value}</div>
+    <Card className="p-4 border-border/70 shadow-[var(--shadow-card)] gap-0">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="grid place-items-center h-6 w-6 rounded-md bg-muted text-foreground/70">{icon}</span>
+        <span className="truncate">{label}</span>
+      </div>
+      <div className="text-2xl font-semibold mt-2.5 truncate tracking-tight">{value}</div>
       {sub && <div className="text-xs text-muted-foreground mt-1 truncate">{sub}</div>}
     </Card>
   );
@@ -204,8 +207,8 @@ function Stat({ icon, label, value, sub }: { icon: React.ReactNode; label: strin
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="p-4 border-border/60 shadow-none">
-      <div className="text-sm font-medium mb-3">{title}</div>
+    <Card className="p-4 sm:p-5 border-border/70 shadow-[var(--shadow-card)] gap-0">
+      <div className="text-sm font-semibold mb-3">{title}</div>
       {children}
     </Card>
   );
