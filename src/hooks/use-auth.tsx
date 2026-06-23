@@ -39,9 +39,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!session) return;
 
-    supabase.rpc("claim_legacy_records").catch((error) => {
-      console.error("Failed to claim legacy records", error);
-    });
+    const claimRecords = async () => {
+      const { error } = await supabase.rpc("claim_legacy_records");
+      if (error) {
+        console.error("Failed to claim legacy records", error);
+      }
+    };
+
+    void claimRecords();
   }, [session]);
 
   const value = useMemo(() => ({ session, loading }), [loading, session]);
