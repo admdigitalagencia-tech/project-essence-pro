@@ -126,11 +126,22 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  html, body { height: 100%; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4 { letter-spacing: -0.02em; }
+  ::selection { background: color-mix(in oklab, var(--primary) 25%, transparent); }
 }
+
+@utility surface-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
