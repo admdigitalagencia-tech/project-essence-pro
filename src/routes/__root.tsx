@@ -98,9 +98,18 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen flex bg-background">
         <AppSidebar />
-        <main className="flex-1 min-w-0">
-          <Outlet />
-        </main>
+        <div className="flex-1 min-w-0 flex flex-col">
+          <header className="md:hidden sticky top-0 z-30 flex items-center gap-2 border-b border-border bg-background/85 backdrop-blur px-3 h-14">
+            <MobileNav />
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground grid place-items-center text-xs font-semibold">L</div>
+              <span className="font-semibold text-sm">Lucas Productivity OS</span>
+            </div>
+          </header>
+          <main className="flex-1 min-w-0">
+            <Outlet />
+          </main>
+        </div>
       </div>
       <Toaster />
     </QueryClientProvider>
