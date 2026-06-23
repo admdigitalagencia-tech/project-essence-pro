@@ -24,6 +24,19 @@ function ConfigPage() {
       </div>
 
       <Card className="p-5 mt-4 border-border/60 shadow-none">
+        <h3 className="font-medium mb-2">Como usar fontes de dados</h3>
+        <p className="text-sm text-muted-foreground">
+          Use fontes específicas para distinguir entrada manual, importações em lote e integrações.
+          Exemplo: <span className="text-foreground">Lançamento Manual</span> para cadastro direto,
+          <span className="text-foreground"> Importação CSV/TSV</span> ou
+          <span className="text-foreground"> Planilha Excel (XLS/XLSX)</span> para cargas em lote, e
+          <span className="text-foreground"> Google Sheets</span>,
+          <span className="text-foreground"> Notion</span> ou
+          <span className="text-foreground"> GitHub</span> para origem integrada.
+        </p>
+      </Card>
+
+      <Card className="p-5 mt-4 border-border/60 shadow-none">
         <h3 className="font-medium mb-2">Cálculo do score qualitativo</h3>
         <p className="text-sm text-muted-foreground mb-3">
           O score é calculado automaticamente em cada task com os pesos:
