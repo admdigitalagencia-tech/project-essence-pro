@@ -95,9 +95,9 @@ function Dashboard() {
         <EmptyState />
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
             <Stat icon={<TrendingUp className="h-4 w-4" />} label="Total de tasks" value={m.total} />
-            <Stat icon={<CheckCircle2 className="h-4 w-4" />} label="Concluídas" value={m.done} sub={m.total ? `${Math.round(m.done/m.total*100)}%` : "—"} />
+            <Stat icon={<CheckCircle2 className="h-4 w-4" />} label="Concluídas" value={m.done} sub={m.total ? `${Math.round(m.done/m.total*100)}% do total` : "—"} />
             <Stat icon={<FolderKanban className="h-4 w-4" />} label="Projetos ativos" value={m.activeProjects} />
             <Stat icon={<Star className="h-4 w-4" />} label="Score médio" value={m.avgScore.toFixed(1)} sub={classifyScore(m.avgScore).label} />
             <Stat icon={<Trophy className="h-4 w-4" />} label="Tasks estratégicas" value={m.strategic} sub="score ≥ 8.5" />
