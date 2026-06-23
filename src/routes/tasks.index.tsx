@@ -12,6 +12,7 @@ import { useFilters, applyFilters } from "@/lib/filters";
 import { useTasks, useWorkOrigins, useProjects, useDataSources, usePlatforms } from "@/lib/queries";
 import {
   TASK_CATEGORIES,
+  TASK_TYPES,
   PRIORITIES,
   PRIORITY_LABELS,
   STATUSES,
@@ -55,6 +56,7 @@ type EditableTaskFields = {
   platform_id: string;
   project_id: string;
   area: string;
+  task_type: string;
   status: string;
   priority: string;
   task_date: string;
@@ -99,6 +101,7 @@ function TasksPage() {
           platform_id: task.platform_id ?? "",
           project_id: task.project_id ?? "",
           area: task.area ?? "",
+          task_type: task.task_type ?? "",
           status: task.status,
           priority: task.priority,
           task_date: task.task_date ?? "",
@@ -147,6 +150,7 @@ function TasksPage() {
         platform_id: nextDraft.platform_id || null,
         project_id: nextDraft.project_id || null,
         area: nextDraft.area || null,
+        task_type: nextDraft.task_type || null,
         status: nextDraft.status,
         priority: nextDraft.priority,
         task_date: nextDraft.task_date || null,
@@ -198,7 +202,7 @@ function TasksPage() {
 
         {/* Desktop table */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full min-w-[1760px] text-sm">
+          <table className="w-full min-w-[1940px] text-sm">
             <thead className="bg-muted/50 text-[11px] uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="text-left px-6 py-4 font-semibold w-[520px]">Task</th>
@@ -206,6 +210,7 @@ function TasksPage() {
                 <th className="text-left px-4 py-4 font-semibold w-[170px]">Plataforma</th>
                 <th className="text-left px-4 py-4 font-semibold w-[190px]">Projeto</th>
                 <th className="text-left px-4 py-4 font-semibold w-[190px]">Tipo</th>
+                <th className="text-left px-4 py-4 font-semibold w-[180px]">Tipo de task</th>
                 <th className="text-left px-4 py-4 font-semibold w-[160px]">Status</th>
                 <th className="text-left px-4 py-4 font-semibold w-[140px]">Prio.</th>
                 <th className="text-right px-4 py-4 font-semibold w-[90px]">Score</th>
@@ -214,9 +219,9 @@ function TasksPage() {
               </tr>
             </thead>
             <tbody>
-              {isLoading && <tr><td colSpan={10} className="p-8 text-center text-muted-foreground">Carregando…</td></tr>}
+              {isLoading && <tr><td colSpan={11} className="p-8 text-center text-muted-foreground">Carregando…</td></tr>}
               {!isLoading && filtered.length === 0 && (
-                <tr><td colSpan={10} className="p-10 text-center text-muted-foreground">Nenhuma task encontrada.</td></tr>
+                <tr><td colSpan={11} className="p-10 text-center text-muted-foreground">Nenhuma task encontrada.</td></tr>
               )}
               {filtered.map((t) => {
                 const c = classifyScore(t.quality_score ?? 0);
@@ -318,6 +323,24 @@ function TasksPage() {
                     </td>
                     <td className="px-4 py-5">
                       <CompactSelect
+                        value={draft.task_type || NONE}
+                        placeholder="Selecionar"
+                        onValueChange={(value) => {
+                          const nextValue = value === NONE ? "" : value;
+                          patchDraft(t.id, { task_type: nextValue });
+                          void saveTask(t.id, { task_type: nextValue });
+                        }}
+                      >
+                        <SelectItem value={NONE}>Sem tipo de task</SelectItem>
+                        {TASK_TYPES.map((taskType) => (
+                          <SelectItem key={taskType} value={taskType}>
+                            {taskType}
+                          </SelectItem>
+                        ))}
+                      </CompactSelect>
+                    </td>
+                    <td className="px-4 py-5">
+                      <CompactSelect
                         value={draft.status}
                         placeholder="Status"
                         triggerClassName="min-w-[140px]"
@@ -412,6 +435,7 @@ function TasksPage() {
                   </span>
                   {t.work_origin_id && <Badge variant="outline">{lookup.origin[t.work_origin_id]?.name}</Badge>}
                   {t.project_id && <Badge variant="outline">{lookup.project[t.project_id]?.name}</Badge>}
+                  {t.task_type && <Badge variant="outline">{t.task_type}</Badge>}
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>{t.task_date ?? t.created_at.slice(0,10)}</span>
