@@ -101,58 +101,87 @@ function ImportPage() {
 
   return (
     <PageContainer>
-      <PageHeader title="Importações" subtitle="Importe CSV ou cadastre manualmente" />
-      <Card className="p-6 border-border/60 shadow-none space-y-4 max-w-3xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Origem do trabalho</Label>
-            <Select value={origin || NONE} onValueChange={(v) => setOrigin(v === NONE ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>—</SelectItem>
-                {origins.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+      <PageHeader title="Importações" subtitle="Importe tasks via CSV de forma rápida e segura" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0 lg:col-span-2 space-y-5">
+          <div>
+            <div className="text-sm font-semibold mb-4">1. Contexto da importação</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Origem do trabalho<span className="text-destructive ml-0.5">*</span></Label>
+                <Select value={origin || NONE} onValueChange={(v) => setOrigin(v === NONE ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>—</SelectItem>
+                    {origins.map((o) => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Fonte de dados<span className="text-destructive ml-0.5">*</span></Label>
+                <Select value={source || NONE} onValueChange={(v) => setSource(v === NONE ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>—</SelectItem>
+                    {sources.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Fonte de dados</Label>
-            <Select value={source || NONE} onValueChange={(v) => setSource(v === NONE ? "" : v)}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>—</SelectItem>
-                {sources.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Arquivo CSV</Label>
-          <Input type="file" accept=".csv,text/csv" onChange={(e) => onFile(e.target.files?.[0] ?? null)} />
-          <p className="text-xs text-muted-foreground">Colunas aceitas: title, description, area, type, status, priority, date, deadline, estimated_time, actual_time</p>
-        </div>
 
-        {preview.length > 0 && (
-          <div className="border border-border/60 rounded-lg overflow-x-auto">
-            <div className="text-xs px-3 py-2 border-b border-border/60 bg-muted/30">Pré-visualização (5 primeiras linhas)</div>
-            <table className="w-full text-xs">
-              <thead className="bg-muted/30">
-                <tr>{headers.map((h) => <th key={h} className="text-left px-2 py-1.5 font-medium">{h}</th>)}</tr>
-              </thead>
-              <tbody>
-                {preview.map((r, i) => (
-                  <tr key={i} className="border-t border-border/60">
-                    {headers.map((h) => <td key={h} className="px-2 py-1.5">{r[h]}</td>)}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div>
+            <div className="text-sm font-semibold mb-4">2. Arquivo CSV</div>
+            <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-xl px-6 py-10 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors">
+              <div className="grid place-items-center h-10 w-10 rounded-full bg-primary/10 text-primary">
+                <Upload className="h-5 w-5" />
+              </div>
+              <div className="text-sm font-medium">{file ? file.name : "Clique para selecionar um CSV"}</div>
+              <div className="text-xs text-muted-foreground">{file ? `${(file.size / 1024).toFixed(1)} KB` : "ou arraste o arquivo aqui"}</div>
+              <Input type="file" accept=".csv,text/csv" onChange={(e) => onFile(e.target.files?.[0] ?? null)} className="hidden" />
+            </label>
           </div>
-        )}
 
-        <Button onClick={doImport} disabled={busy || !file || !origin || !source}>
-          <Upload className="h-4 w-4 mr-1.5" />{busy ? "Importando…" : "Importar"}
-        </Button>
-      </Card>
+          {preview.length > 0 && (
+            <div>
+              <div className="text-sm font-semibold mb-2">3. Pré-visualização</div>
+              <div className="text-xs text-muted-foreground mb-2">5 primeiras linhas detectadas</div>
+              <div className="border border-border/70 rounded-lg overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted/50 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <tr>{headers.map((h) => <th key={h} className="text-left px-3 py-2 font-semibold whitespace-nowrap">{h}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {preview.map((r, i) => (
+                      <tr key={i} className="border-t border-border/60">
+                        {headers.map((h) => <td key={h} className="px-3 py-2 max-w-[200px] truncate">{r[h]}</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-2 border-t border-border/60">
+            <Button onClick={doImport} disabled={busy || !file || !origin || !source} size="lg">
+              <Upload className="h-4 w-4 mr-1.5" />{busy ? "Importando…" : "Importar tasks"}
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0 h-fit">
+          <div className="text-sm font-semibold mb-3">Colunas aceitas</div>
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {["title", "description", "area", "type", "status", "priority", "date", "deadline", "estimated_time", "actual_time"].map((c) => (
+              <span key={c} className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-muted text-foreground/80">{c}</span>
+            ))}
+          </div>
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            Aliases em português também são reconhecidos: <span className="font-mono">titulo, descricao, tipo, prioridade, data, prazo, estimativa, tempo</span>.
+          </div>
+        </Card>
+      </div>
     </PageContainer>
   );
 }
