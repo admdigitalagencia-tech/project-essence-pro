@@ -157,6 +157,7 @@ export type Database = {
           project_id: string | null
           quality_score: number | null
           result: string | null
+          score_audit_notes: string | null
           status: string | null
           strategic_relevance: number | null
           task_date: string | null
@@ -186,6 +187,7 @@ export type Database = {
           project_id?: string | null
           quality_score?: number | null
           result?: string | null
+          score_audit_notes?: string | null
           status?: string | null
           strategic_relevance?: number | null
           task_date?: string | null
@@ -215,6 +217,7 @@ export type Database = {
           project_id?: string | null
           quality_score?: number | null
           result?: string | null
+          score_audit_notes?: string | null
           status?: string | null
           strategic_relevance?: number | null
           task_date?: string | null
