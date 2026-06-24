@@ -32,7 +32,7 @@ function NovaTask() {
     work_origin_id: "", data_source_id: "", project_id: "",
     title: "", description: "", area: "", channel: "", task_type: "",
     status: "todo", priority: "medium",
-    impact: 5, complexity: 5, strategic_relevance: 5, urgency: 5, evidence_score: 5,
+    impact: 3, complexity: 3, strategic_relevance: 3, urgency: 3, evidence_score: 3,
     evidence: "", result: "",
     task_date: new Date().toISOString().slice(0, 10),
     deadline: "", completed_at: "",
