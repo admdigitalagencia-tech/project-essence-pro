@@ -225,8 +225,8 @@ function Field({ label, required, children }: { label: string; required?: boolea
 function SliderField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div className="mb-4">
-      <div className="flex justify-between text-xs mb-2"><span className="text-muted-foreground">{label}</span><span className="font-semibold tabular-nums">{value}</span></div>
-      <Slider min={0} max={10} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
+      <div className="flex justify-between text-xs mb-2"><span className="text-muted-foreground">{label}</span><span className="font-semibold tabular-nums">{value} / 5</span></div>
+      <Slider min={0} max={5} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
     </div>
   );
 }
