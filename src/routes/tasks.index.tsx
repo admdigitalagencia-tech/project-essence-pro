@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PageContainer, PageHeader } from "@/components/PageLayout";
 import { FiltersBar } from "@/components/FiltersBar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -13,8 +14,8 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Plus, Search, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { useFilters, applyFilters } from "@/lib/filters";
-import { useTasks, useWorkOrigins, useProjects, useDataSources } from "@/lib/queries";
-import { STATUS_LABELS, PRIORITY_LABELS, classifyScore } from "@/lib/constants";
+import { useTasks, useWorkOrigins, useProjects } from "@/lib/queries";
+import { AREAS, STATUS_LABELS, PRIORITY_LABELS, STATUSES, PRIORITIES, classifyScore } from "@/lib/constants";
 import { db, type Task } from "@/lib/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -46,13 +47,27 @@ function priorityClasses(p: string) {
   return "bg-muted text-muted-foreground border-border";
 }
 
+const NONE = "__none__";
+
+type EditableTaskFields = {
+  title: string;
+  description: string;
+  work_origin_id: string;
+  project_id: string;
+  area: string;
+  status: string;
+  priority: string;
+  task_date: string;
+};
+
 function TasksPage() {
   const { filters, update, reset } = useFilters();
   const { data: tasks = [], isLoading } = useTasks();
   const { data: origins = [] } = useWorkOrigins();
-  const { data: sources = [] } = useDataSources();
   const { data: projects = [] } = useProjects();
   const [q, setQ] = useState("");
+  const [drafts, setDrafts] = useState<Record<string, EditableTaskFields>>({});
+  const [savingIds, setSavingIds] = useState<string[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [auditing, setAuditing] = useState(false);
   const qc = useQueryClient();
@@ -60,9 +75,8 @@ function TasksPage() {
 
   const lookup = useMemo(() => ({
     origin: Object.fromEntries(origins.map((o) => [o.id, o])),
-    source: Object.fromEntries(sources.map((s) => [s.id, s])),
     project: Object.fromEntries(projects.map((p) => [p.id, p])),
-  }), [origins, sources, projects]);
+  }), [origins, projects]);
 
   const filtered = useMemo(() => {
     const list = applyFilters(tasks, filters);
@@ -73,6 +87,74 @@ function TasksPage() {
       (t.description ?? "").toLowerCase().includes(needle)
     );
   }, [tasks, filters, q]);
+
+  useEffect(() => {
+    setDrafts((current) => {
+      const next: Record<string, EditableTaskFields> = {};
+      tasks.forEach((task) => {
+        next[task.id] = current[task.id] ?? {
+          title: task.title,
+          description: task.description ?? "",
+          work_origin_id: task.work_origin_id ?? "",
+          project_id: task.project_id ?? "",
+          area: task.area ?? "",
+          status: task.status,
+          priority: task.priority,
+          task_date: task.task_date ?? "",
+        };
+      });
+      return next;
+    });
+  }, [tasks]);
+
+  function patchDraft(taskId: string, patch: Partial<EditableTaskFields>) {
+    setDrafts((current) => ({
+      ...current,
+      [taskId]: {
+        ...current[taskId],
+        ...patch,
+      },
+    }));
+  }
+
+  async function saveTask(taskId: string, patch?: Partial<EditableTaskFields>) {
+    const currentDraft = drafts[taskId];
+    if (!currentDraft) return;
+
+    const nextDraft = patch ? { ...currentDraft, ...patch } : currentDraft;
+    const title = nextDraft.title.trim();
+    if (!title) {
+      toast.error("Título não pode ficar vazio");
+      return;
+    }
+
+    setSavingIds((current) => [...new Set([...current, taskId])]);
+    const { error } = await db
+      .from("tasks")
+      .update({
+        title,
+        description: nextDraft.description.trim() || null,
+        work_origin_id: nextDraft.work_origin_id || null,
+        project_id: nextDraft.project_id || null,
+        area: nextDraft.area || null,
+        status: nextDraft.status,
+        priority: nextDraft.priority,
+        task_date: nextDraft.task_date || null,
+      })
+      .eq("id", taskId);
+    setSavingIds((current) => current.filter((id) => id !== taskId));
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    setDrafts((current) => ({
+      ...current,
+      [taskId]: nextDraft,
+    }));
+    qc.invalidateQueries({ queryKey: ["tasks"] });
+  }
 
   async function remove(id: string) {
     if (!confirm("Excluir esta task?")) return;
@@ -181,20 +263,124 @@ function TasksPage() {
                 {filtered.map((t) => {
                   const score = t.quality_score ?? 0;
                   const c = classifyScore(score);
+                  const draft = drafts[t.id];
+                  const saving = savingIds.includes(t.id);
+                  if (!draft) return null;
                   return (
                     <tr key={t.id} className="border-t border-border/60 hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 min-w-[240px] max-w-[360px]">
-                        <div className="font-medium truncate">{t.title}</div>
-                        {t.description && <div className="text-xs text-muted-foreground line-clamp-1">{t.description}</div>}
+                        <Input
+                          value={draft.title}
+                          onChange={(e) => patchDraft(t.id, { title: e.target.value })}
+                          onBlur={() => saveTask(t.id)}
+                          disabled={saving}
+                          className="h-8 border-0 bg-transparent px-0 text-sm font-semibold shadow-none focus-visible:ring-0"
+                        />
+                        <Input
+                          value={draft.description}
+                          onChange={(e) => patchDraft(t.id, { description: e.target.value })}
+                          onBlur={() => saveTask(t.id)}
+                          disabled={saving}
+                          placeholder="Adicionar descrição..."
+                          className="mt-1 h-7 border-0 bg-transparent px-0 text-xs text-muted-foreground shadow-none focus-visible:ring-0"
+                        />
                       </td>
-                      <td className="px-3 py-3 text-xs whitespace-nowrap">{t.work_origin_id ? lookup.origin[t.work_origin_id]?.name : "—"}</td>
-                      <td className="px-3 py-3 text-xs whitespace-nowrap max-w-[160px] truncate">{t.project_id ? lookup.project[t.project_id]?.name : "—"}</td>
-                      <td className="px-3 py-3 text-xs whitespace-nowrap">{t.area ?? "—"}</td>
-                      <td className="px-3 py-3"><Badge variant={statusVariant(t.status)} className="text-[10px] font-medium">{STATUS_LABELS[t.status] ?? t.status}</Badge></td>
                       <td className="px-3 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${priorityClasses(t.priority)}`}>
-                          {PRIORITY_LABELS[t.priority] ?? t.priority}
-                        </span>
+                        <CompactSelect
+                          value={draft.work_origin_id || NONE}
+                          placeholder="Origem"
+                          disabled={saving}
+                          onValueChange={(value) => {
+                            const nextValue = value === NONE ? "" : value;
+                            patchDraft(t.id, { work_origin_id: nextValue, project_id: "" });
+                            void saveTask(t.id, { work_origin_id: nextValue, project_id: "" });
+                          }}
+                        >
+                          <SelectItem value={NONE}>Sem origem</SelectItem>
+                          {origins.map((origin) => (
+                            <SelectItem key={origin.id} value={origin.id}>
+                              {origin.name}
+                            </SelectItem>
+                          ))}
+                        </CompactSelect>
+                      </td>
+                      <td className="px-3 py-3">
+                        <CompactSelect
+                          value={draft.project_id || NONE}
+                          placeholder="Projeto"
+                          disabled={saving}
+                          onValueChange={(value) => {
+                            const nextValue = value === NONE ? "" : value;
+                            patchDraft(t.id, { project_id: nextValue });
+                            void saveTask(t.id, { project_id: nextValue });
+                          }}
+                        >
+                          <SelectItem value={NONE}>Sem projeto</SelectItem>
+                          {projects
+                            .filter((project) =>
+                              !draft.work_origin_id || project.work_origin_id === draft.work_origin_id,
+                            )
+                            .map((project) => (
+                              <SelectItem key={project.id} value={project.id}>
+                                {project.name}
+                              </SelectItem>
+                            ))}
+                        </CompactSelect>
+                      </td>
+                      <td className="px-3 py-3">
+                        <CompactSelect
+                          value={draft.area || NONE}
+                          placeholder="Área"
+                          disabled={saving}
+                          onValueChange={(value) => {
+                            const nextValue = value === NONE ? "" : value;
+                            patchDraft(t.id, { area: nextValue });
+                            void saveTask(t.id, { area: nextValue });
+                          }}
+                        >
+                          <SelectItem value={NONE}>Sem área</SelectItem>
+                          {AREAS.map((area) => (
+                            <SelectItem key={area} value={area}>
+                              {area}
+                            </SelectItem>
+                          ))}
+                        </CompactSelect>
+                      </td>
+                      <td className="px-3 py-3">
+                        <CompactSelect
+                          value={draft.status}
+                          placeholder="Status"
+                          disabled={saving}
+                          triggerClassName="min-w-[132px]"
+                          onValueChange={(value) => {
+                            patchDraft(t.id, { status: value });
+                            void saveTask(t.id, { status: value });
+                          }}
+                        >
+                          {STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {STATUS_LABELS[status] ?? status}
+                            </SelectItem>
+                          ))}
+                        </CompactSelect>
+                      </td>
+                      <td className="px-3 py-3">
+                        <CompactSelect
+                          value={draft.priority}
+                          placeholder="Prioridade"
+                          disabled={saving}
+                          triggerClassName={`min-w-[118px] ${priorityClasses(draft.priority)}`}
+                          onValueChange={(value) => {
+                            patchDraft(t.id, { priority: value });
+                            void saveTask(t.id, { priority: value });
+                          }}
+                        >
+                          {PRIORITIES.map((priority) => (
+                            <SelectItem key={priority} value={priority}>
+                              {PRIORITY_LABELS[priority] ?? priority}
+                            </SelectItem>
+                          ))}
+                        </CompactSelect>
                       </td>
                       <td className="px-3 py-3 text-right">
                         <Tooltip>
@@ -209,9 +395,18 @@ function TasksPage() {
                         </Tooltip>
                       </td>
                       <td className="px-3 py-3 text-xs whitespace-nowrap text-muted-foreground">{c.label}</td>
-                      <td className="px-3 py-3 text-xs text-muted-foreground whitespace-nowrap tabular-nums">{t.task_date ?? t.created_at.slice(0,10)}</td>
+                      <td className="px-3 py-3 text-xs text-muted-foreground whitespace-nowrap tabular-nums">
+                        <Input
+                          type="date"
+                          value={draft.task_date}
+                          onChange={(e) => patchDraft(t.id, { task_date: e.target.value })}
+                          onBlur={() => saveTask(t.id)}
+                          disabled={saving}
+                          className="h-9 min-w-[138px]"
+                        />
+                      </td>
                       <td className="px-2 py-3">
-                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)} className="h-8 w-8">
+                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)} className="h-8 w-8" disabled={saving}>
                           <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                       </td>
@@ -303,5 +498,30 @@ function FactorBreakdown({ task }: { task: Task }) {
       ))}
       {notes && <div className="pt-1.5 mt-1.5 border-t border-border/50 text-[11px] text-muted-foreground max-w-[260px]">{notes}</div>}
     </div>
+  );
+}
+
+function CompactSelect({
+  value,
+  placeholder,
+  onValueChange,
+  children,
+  triggerClassName,
+  disabled,
+}: {
+  value: string;
+  placeholder: string;
+  onValueChange: (value: string) => void;
+  children: React.ReactNode;
+  triggerClassName?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+      <SelectTrigger className={`h-9 min-w-[128px] justify-between text-xs ${triggerClassName ?? ""}`}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>{children}</SelectContent>
+    </Select>
   );
 }
