@@ -37,5 +37,6 @@ export type Task = {
   estimated_time: number | null;
   actual_time: number | null;
   quality_score: number;
+  score_audit_notes: string | null;
   created_at: string;
 };
