@@ -100,7 +100,7 @@ function Dashboard() {
             <Stat icon={<CheckCircle2 className="h-4 w-4" />} label="Concluídas" value={m.done} sub={m.total ? `${Math.round(m.done/m.total*100)}% do total` : "—"} />
             <Stat icon={<FolderKanban className="h-4 w-4" />} label="Projetos ativos" value={m.activeProjects} />
             <Stat icon={<Star className="h-4 w-4" />} label="Score médio" value={m.avgScore.toFixed(1)} sub={classifyScore(m.avgScore).label} />
-            <Stat icon={<Trophy className="h-4 w-4" />} label="Tasks estratégicas" value={m.strategic} sub="score ≥ 8.5" />
+            <Stat icon={<Trophy className="h-4 w-4" />} label="Tasks estratégicas" value={m.strategic} sub="score ≥ 4.25" />
             <Stat icon={<Clock className="h-4 w-4" />} label="Horas registradas" value={m.hours.toFixed(1)} />
             <Stat icon={<Flame className="h-4 w-4" />} label="Origem demandante" value={m.topOrigin?.name ?? "—"} sub={m.topOrigin ? `${m.topOrigin.value} tasks` : ""} />
             <Stat icon={<FolderKanban className="h-4 w-4" />} label="Maior carga" value={m.topProject?.name ?? "—"} sub={m.topProject ? `${m.topProject.value} tasks` : ""} />

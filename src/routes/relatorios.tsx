@@ -92,7 +92,7 @@ function ReportCard({ title, tasks, projects }: { title: string; tasks: any[]; p
       <Section title="Resumo executivo">
         <p className="text-sm text-muted-foreground">
           {total} tasks no período, com {done} concluídas ({total ? Math.round(done/total*100) : 0}%).
-          {strategic.length > 0 && ` ${strategic.length} entregas estratégicas (score ≥ 8.5).`}
+          {strategic.length > 0 && ` ${strategic.length} entregas estratégicas (score ≥ 4.25).`}
           {overdue.length > 0 && ` ${overdue.length} tasks atrasadas.`}
           {blocked.length > 0 && ` ${blocked.length} bloqueadas.`}
         </p>
