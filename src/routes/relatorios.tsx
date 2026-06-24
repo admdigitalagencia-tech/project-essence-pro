@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFilters, applyFilters } from "@/lib/filters";
 import { useTasks, useWorkOrigins, useProjects } from "@/lib/queries";
-import { classifyScore } from "@/lib/constants";
+import { classifyScore, STRATEGIC_SCORE_MIN } from "@/lib/constants";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios · Lucas Productivity OS" }] }),
@@ -67,7 +67,7 @@ function ReportCard({ title, tasks, projects }: { title: string; tasks: any[]; p
   const total = tasks.length;
   const done = tasks.filter((t) => t.status === "concluida").length;
   const avgScore = total ? tasks.reduce((a, t) => a + (t.quality_score ?? 0), 0) / total : 0;
-  const strategic = tasks.filter((t) => (t.quality_score ?? 0) >= 8.5);
+  const strategic = tasks.filter((t) => (t.quality_score ?? 0) >= STRATEGIC_SCORE_MIN);
   const overdue = tasks.filter((t) => t.deadline && t.status !== "concluida" && new Date(t.deadline) < new Date());
   const blocked = tasks.filter((t) => t.status === "bloqueado");
   const next = tasks.filter((t) => t.status !== "concluida" && t.status !== "cancelada")
@@ -92,7 +92,7 @@ function ReportCard({ title, tasks, projects }: { title: string; tasks: any[]; p
       <Section title="Resumo executivo">
         <p className="text-sm text-muted-foreground">
           {total} tasks no período, com {done} concluídas ({total ? Math.round(done/total*100) : 0}%).
-          {strategic.length > 0 && ` ${strategic.length} entregas estratégicas (score ≥ 8.5).`}
+          {strategic.length > 0 && ` ${strategic.length} entregas estratégicas (score ≥ ${STRATEGIC_SCORE_MIN}).`}
           {overdue.length > 0 && ` ${overdue.length} tasks atrasadas.`}
           {blocked.length > 0 && ` ${blocked.length} bloqueadas.`}
         </p>

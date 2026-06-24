@@ -26,7 +26,7 @@ function ConfigPage() {
       <Card className="p-5 sm:p-6 mt-4 sm:mt-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
         <h3 className="font-semibold mb-2">Cálculo do score qualitativo</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          O score é calculado automaticamente em cada task com os pesos:
+          O score é calculado automaticamente em cada task na escala de 0 a 5, com os pesos:
         </p>
         <ul className="text-sm space-y-1 text-muted-foreground mb-5">
           <li>• <span className="text-foreground font-medium">Impacto</span> — 30%</li>
@@ -36,10 +36,10 @@ function ConfigPage() {
           <li>• <span className="text-foreground font-medium">Evidência</span> — 15%</li>
         </ul>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
-          <Range label="0 — 4.9" tone="bg-muted text-foreground/70" desc="Baixo valor operacional" />
-          <Range label="5 — 6.9" tone="bg-accent text-accent-foreground" desc="Tarefa comum" />
-          <Range label="7 — 8.4" tone="bg-primary/15 text-primary" desc="Boa entrega" />
-          <Range label="8.5 — 10" tone="bg-success/15 text-success" desc="Estratégica/crítica" />
+          <Range label="0 — 2.4" tone="bg-muted text-foreground/70" desc="Baixo valor operacional" />
+          <Range label="2.5 — 3.4" tone="bg-accent text-accent-foreground" desc="Tarefa comum" />
+          <Range label="3.5 — 4.2" tone="bg-primary/15 text-primary" desc="Boa entrega" />
+          <Range label="4.25 — 5" tone="bg-success/15 text-success" desc="Estratégica/crítica" />
         </div>
       </Card>
     </PageContainer>

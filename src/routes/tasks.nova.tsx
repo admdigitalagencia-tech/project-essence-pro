@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useWorkOrigins, useDataSources, usePlatforms, useProjects } from "@/lib/queries";
-import { TASK_CATEGORIES, TASK_TYPES, STATUSES, STATUS_LABELS, PRIORITIES, PRIORITY_LABELS, classifyScore } from "@/lib/constants";
+import { TASK_CATEGORIES, TASK_TYPES, STATUSES, STATUS_LABELS, PRIORITIES, PRIORITY_LABELS, SCORE_MAX, classifyScore } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ function NovaTask() {
     work_origin_id: "", data_source_id: "", platform_id: "", project_id: "",
     title: "", description: "", area: "", channel: "", task_type: "",
     status: "todo", priority: "medium",
-    impact: 5, complexity: 5, strategic_relevance: 5, urgency: 5, evidence_score: 5,
+    impact: 3, complexity: 3, strategic_relevance: 3, urgency: 3, evidence_score: 3,
     evidence: "", result: "",
     task_date: new Date().toISOString().slice(0, 10),
     deadline: "", completed_at: "",
@@ -195,7 +195,7 @@ function NovaTask() {
             <SectionTitle>Score qualitativo</SectionTitle>
             <div className="text-xs text-muted-foreground mb-4 leading-relaxed">
               Cálculo automático com pesos:<br />
-              Impacto 30 · Complexidade 20 · Estratégia 20 · Urgência 15 · Evidência 15
+              Cada fator vai de 0 a {SCORE_MAX}: Impacto 30 · Complexidade 20 · Estratégia 20 · Urgência 15 · Evidência 15
             </div>
             <SliderField label="Impacto" value={f.impact} onChange={(v) => set("impact", v)} />
             <SliderField label="Complexidade" value={f.complexity} onChange={(v) => set("complexity", v)} />
@@ -206,7 +206,7 @@ function NovaTask() {
               <div className="text-xs text-muted-foreground">Score previsto</div>
               <div className="flex items-baseline gap-2 mt-1">
                 <div className="text-3xl font-semibold tabular-nums">{previewScore.toFixed(1)}</div>
-                <div className="text-xs text-muted-foreground">/ 10</div>
+                <div className="text-xs text-muted-foreground">/ {SCORE_MAX}</div>
               </div>
               <div className={`text-xs mt-1.5 font-medium ${cls.tone === "success" ? "text-success" : cls.tone === "warning" ? "text-warning-foreground" : cls.tone === "primary" ? "text-primary" : "text-muted-foreground"}`}>{cls.label}</div>
             </div>
@@ -237,7 +237,7 @@ function SliderField({ label, value, onChange }: { label: string; value: number;
   return (
     <div className="mb-4">
       <div className="flex justify-between text-xs mb-2"><span className="text-muted-foreground">{label}</span><span className="font-semibold tabular-nums">{value}</span></div>
-      <Slider min={0} max={10} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
+      <Slider min={0} max={SCORE_MAX} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
     </div>
   );
 }

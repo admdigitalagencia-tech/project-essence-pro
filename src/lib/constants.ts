@@ -21,9 +21,12 @@ export const PRIORITY_LABELS: Record<string,string> = {
   low: "Baixa", medium: "Média", high: "Alta", critical: "Crítica",
 };
 
+export const SCORE_MAX = 5;
+export const STRATEGIC_SCORE_MIN = 4.25;
+
 export function classifyScore(score: number) {
-  if (score >= 8.5) return { label: "Entrega estratégica/crítica", tone: "success" };
-  if (score >= 7) return { label: "Boa entrega", tone: "primary" };
-  if (score >= 5) return { label: "Tarefa comum", tone: "muted" };
+  if (score >= STRATEGIC_SCORE_MIN) return { label: "Entrega estratégica/crítica", tone: "success" };
+  if (score >= 3.5) return { label: "Boa entrega", tone: "primary" };
+  if (score >= 2.5) return { label: "Tarefa comum", tone: "muted" };
   return { label: "Baixo valor operacional", tone: "warning" };
 }
