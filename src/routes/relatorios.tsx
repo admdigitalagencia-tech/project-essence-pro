@@ -67,7 +67,7 @@ function ReportCard({ title, tasks, projects }: { title: string; tasks: any[]; p
   const total = tasks.length;
   const done = tasks.filter((t) => t.status === "concluida").length;
   const avgScore = total ? tasks.reduce((a, t) => a + (t.quality_score ?? 0), 0) / total : 0;
-  const strategic = tasks.filter((t) => (t.quality_score ?? 0) >= 8.5);
+  const strategic = tasks.filter((t) => (t.quality_score ?? 0) >= 4.25);
   const overdue = tasks.filter((t) => t.deadline && t.status !== "concluida" && new Date(t.deadline) < new Date());
   const blocked = tasks.filter((t) => t.status === "bloqueado");
   const next = tasks.filter((t) => t.status !== "concluida" && t.status !== "cancelada")

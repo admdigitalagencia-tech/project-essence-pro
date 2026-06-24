@@ -33,7 +33,7 @@ function Dashboard() {
     const total = filtered.length;
     const done = filtered.filter((t) => t.status === "concluida").length;
     const avgScore = total ? filtered.reduce((a, t) => a + (t.quality_score ?? 0), 0) / total : 0;
-    const strategic = filtered.filter((t) => (t.quality_score ?? 0) >= 8.5).length;
+    const strategic = filtered.filter((t) => (t.quality_score ?? 0) >= 4.25).length;
     const hours = filtered.reduce((a, t) => a + (Number(t.actual_time) || 0), 0);
     const activeProjects = new Set(filtered.map((t) => t.project_id).filter(Boolean)).size;
 
