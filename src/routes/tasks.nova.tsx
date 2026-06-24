@@ -194,8 +194,8 @@ function NovaTask() {
             <div className="mt-5 p-4 rounded-lg border border-border/70 bg-muted/40">
               <div className="text-xs text-muted-foreground">Score previsto</div>
               <div className="flex items-baseline gap-2 mt-1">
-                <div className="text-3xl font-semibold tabular-nums">{previewScore.toFixed(1)}</div>
-                <div className="text-xs text-muted-foreground">/ 10</div>
+                <div className="text-3xl font-semibold tabular-nums">{previewScore.toFixed(2)}</div>
+                <div className="text-xs text-muted-foreground">/ 5</div>
               </div>
               <div className={`text-xs mt-1.5 font-medium ${cls.tone === "success" ? "text-success" : cls.tone === "warning" ? "text-warning-foreground" : cls.tone === "primary" ? "text-primary" : "text-muted-foreground"}`}>{cls.label}</div>
             </div>
