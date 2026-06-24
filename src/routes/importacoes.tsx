@@ -46,33 +46,6 @@ function pick(row: Record<string, string>, ...keys: string[]) {
   return "";
 }
 
-function normalizeDate(value: string) {
-  const raw = value.trim();
-  if (!raw) return null;
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-
-  const brMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (brMatch) {
-    const [, day, month, year] = brMatch;
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-  }
-
-  const slashIsoMatch = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
-  if (slashIsoMatch) {
-    const [, year, month, day] = slashIsoMatch;
-    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-  }
-
-  const parsed = new Date(raw);
-  if (Number.isNaN(parsed.getTime())) return raw;
-
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, "0");
-  const day = String(parsed.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function ImportPage() {
   const { data: origins = [] } = useWorkOrigins();
   const { data: sources = [] } = useDataSources();
@@ -101,12 +74,12 @@ function ImportPage() {
         data_source_id: source,
         title: pick(r, "title", "titulo", "task", "name") || "(sem título)",
         description: pick(r, "description", "descricao", "notes") || null,
-        area: pick(r, "area", "tipo") || null,
+        area: pick(r, "area") || null,
         task_type: pick(r, "type", "tipo") || null,
         status: pick(r, "status") || "todo",
         priority: pick(r, "priority", "prioridade") || "medium",
-        task_date: normalizeDate(pick(r, "date", "data", "task_date")),
-        deadline: normalizeDate(pick(r, "deadline", "prazo")),
+        task_date: pick(r, "date", "data", "task_date") || null,
+        deadline: pick(r, "deadline", "prazo") || null,
         estimated_time: Number(pick(r, "estimated_time", "estimativa")) || null,
         actual_time: Number(pick(r, "actual_time", "tempo")) || null,
       }));
@@ -200,7 +173,7 @@ function ImportPage() {
         <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0 h-fit">
           <div className="text-sm font-semibold mb-3">Colunas aceitas</div>
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {["title", "description", "tipo", "type", "status", "priority", "date", "deadline", "estimated_time", "actual_time"].map((c) => (
+            {["title", "description", "area", "type", "status", "priority", "date", "deadline", "estimated_time", "actual_time"].map((c) => (
               <span key={c} className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-muted text-foreground/80">{c}</span>
             ))}
           </div>

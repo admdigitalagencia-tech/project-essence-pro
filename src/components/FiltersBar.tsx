@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { type Filters } from "@/lib/filters";
-import { TASK_CATEGORIES, PRIORITIES, STATUSES, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/constants";
+import { AREAS, PRIORITIES, STATUSES, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/constants";
 import { useWorkOrigins, useDataSources, useProjects } from "@/lib/queries";
 
 const ANY = "__any__";
@@ -26,7 +26,6 @@ export function FiltersBar({
 
   const activeCount =
     (filters.period !== "all" ? 1 : 0) +
-    (filters.sortDate !== "desc" ? 1 : 0) +
     (filters.work_origin_id ? 1 : 0) +
     (filters.data_source_id ? 1 : 0) +
     (filters.project_id ? 1 : 0) +
@@ -57,7 +56,7 @@ export function FiltersBar({
           )}
         </div>
         <CollapsibleContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3 mt-3">
             <FilterItem label="Período">
               <Select value={filters.period} onValueChange={(v) => update({ period: v as Filters["period"] })}>
                 <SelectTrigger><SelectValue placeholder="Período" /></SelectTrigger>
@@ -66,19 +65,6 @@ export function FiltersBar({
                   <SelectItem value="7d">Últimos 7 dias</SelectItem>
                   <SelectItem value="30d">Últimos 30 dias</SelectItem>
                   <SelectItem value="90d">Últimos 90 dias</SelectItem>
-                </SelectContent>
-              </Select>
-            </FilterItem>
-
-            <FilterItem label="Ordem da data">
-              <Select
-                value={filters.sortDate}
-                onValueChange={(v) => update({ sortDate: v as Filters["sortDate"] })}
-              >
-                <SelectTrigger><SelectValue placeholder="Ordenação" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="desc">Mais recentes primeiro</SelectItem>
-                  <SelectItem value="asc">Mais antigas primeiro</SelectItem>
                 </SelectContent>
               </Select>
             </FilterItem>
@@ -113,12 +99,12 @@ export function FiltersBar({
               </Select>
             </FilterItem>
 
-            <FilterItem label="Tipo">
+            <FilterItem label="Área">
               <Select value={sel(filters.area)} onValueChange={onChange("area")}>
-                <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Área" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={ANY}>Todos tipos</SelectItem>
-                  {TASK_CATEGORIES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                  <SelectItem value={ANY}>Todas áreas</SelectItem>
+                  {AREAS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
                 </SelectContent>
               </Select>
             </FilterItem>

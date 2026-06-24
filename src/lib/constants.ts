@@ -1,4 +1,4 @@
-export const TASK_CATEGORIES = [
+export const AREAS = [
   "Google Ads", "Meta Ads", "Tracking & Mensuração", "CRM & Leads",
   "Relatórios & Análise", "Criativos & Conteúdo", "Landing Pages",
   "Estratégia", "Comercial/Vendas", "Produto/SaaS", "Automação/IA",
@@ -21,11 +21,9 @@ export const PRIORITY_LABELS: Record<string,string> = {
   low: "Baixa", medium: "Média", high: "Alta", critical: "Crítica",
 };
 
-export const SCORE_MAX = 5;
-export const STRATEGIC_SCORE_MIN = 4.25;
-
+// Score em escala 0–5.
 export function classifyScore(score: number) {
-  if (score >= STRATEGIC_SCORE_MIN) return { label: "Entrega estratégica/crítica", tone: "success" };
+  if (score >= 4.25) return { label: "Entrega estratégica/crítica", tone: "success" };
   if (score >= 3.5) return { label: "Boa entrega", tone: "primary" };
   if (score >= 2.5) return { label: "Tarefa comum", tone: "muted" };
   return { label: "Baixo valor operacional", tone: "warning" };

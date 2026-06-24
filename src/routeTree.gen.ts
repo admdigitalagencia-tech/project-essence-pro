@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as ProjetosRouteImport } from './routes/projetos'
-import { Route as PlataformasRouteImport } from './routes/plataformas'
 import { Route as OrigensRouteImport } from './routes/origens'
 import { Route as ImportacoesRouteImport } from './routes/importacoes'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
@@ -27,11 +26,6 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
 const ProjetosRoute = ProjetosRouteImport.update({
   id: '/projetos',
   path: '/projetos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlataformasRoute = PlataformasRouteImport.update({
-  id: '/plataformas',
-  path: '/plataformas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrigensRoute = OrigensRouteImport.update({
@@ -70,7 +64,6 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof ConfiguracoesRoute
   '/importacoes': typeof ImportacoesRoute
   '/origens': typeof OrigensRoute
-  '/plataformas': typeof PlataformasRoute
   '/projetos': typeof ProjetosRoute
   '/relatorios': typeof RelatoriosRoute
   '/tasks/nova': typeof TasksNovaRoute
@@ -81,7 +74,6 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof ConfiguracoesRoute
   '/importacoes': typeof ImportacoesRoute
   '/origens': typeof OrigensRoute
-  '/plataformas': typeof PlataformasRoute
   '/projetos': typeof ProjetosRoute
   '/relatorios': typeof RelatoriosRoute
   '/tasks/nova': typeof TasksNovaRoute
@@ -93,7 +85,6 @@ export interface FileRoutesById {
   '/configuracoes': typeof ConfiguracoesRoute
   '/importacoes': typeof ImportacoesRoute
   '/origens': typeof OrigensRoute
-  '/plataformas': typeof PlataformasRoute
   '/projetos': typeof ProjetosRoute
   '/relatorios': typeof RelatoriosRoute
   '/tasks/nova': typeof TasksNovaRoute
@@ -106,7 +97,6 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/importacoes'
     | '/origens'
-    | '/plataformas'
     | '/projetos'
     | '/relatorios'
     | '/tasks/nova'
@@ -117,7 +107,6 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/importacoes'
     | '/origens'
-    | '/plataformas'
     | '/projetos'
     | '/relatorios'
     | '/tasks/nova'
@@ -128,7 +117,6 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/importacoes'
     | '/origens'
-    | '/plataformas'
     | '/projetos'
     | '/relatorios'
     | '/tasks/nova'
@@ -140,7 +128,6 @@ export interface RootRouteChildren {
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ImportacoesRoute: typeof ImportacoesRoute
   OrigensRoute: typeof OrigensRoute
-  PlataformasRoute: typeof PlataformasRoute
   ProjetosRoute: typeof ProjetosRoute
   RelatoriosRoute: typeof RelatoriosRoute
   TasksNovaRoute: typeof TasksNovaRoute
@@ -161,13 +148,6 @@ declare module '@tanstack/react-router' {
       path: '/projetos'
       fullPath: '/projetos'
       preLoaderRoute: typeof ProjetosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/plataformas': {
-      id: '/plataformas'
-      path: '/plataformas'
-      fullPath: '/plataformas'
-      preLoaderRoute: typeof PlataformasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/origens': {
@@ -220,7 +200,6 @@ const rootRouteChildren: RootRouteChildren = {
   ConfiguracoesRoute: ConfiguracoesRoute,
   ImportacoesRoute: ImportacoesRoute,
   OrigensRoute: OrigensRoute,
-  PlataformasRoute: PlataformasRoute,
   ProjetosRoute: ProjetosRoute,
   RelatoriosRoute: RelatoriosRoute,
   TasksNovaRoute: TasksNovaRoute,
@@ -229,13 +208,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

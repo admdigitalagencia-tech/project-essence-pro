@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useWorkOrigins, useDataSources, usePlatforms, useProjects } from "@/lib/queries";
-import { TASK_CATEGORIES, TASK_TYPES, STATUSES, STATUS_LABELS, PRIORITIES, PRIORITY_LABELS, SCORE_MAX, classifyScore } from "@/lib/constants";
+import { useWorkOrigins, useDataSources, useProjects } from "@/lib/queries";
+import { AREAS, TASK_TYPES, STATUSES, STATUS_LABELS, PRIORITIES, PRIORITY_LABELS, classifyScore } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -26,11 +26,10 @@ function NovaTask() {
   const qc = useQueryClient();
   const { data: origins = [] } = useWorkOrigins();
   const { data: sources = [] } = useDataSources();
-  const { data: platforms = [] } = usePlatforms();
   const { data: projects = [] } = useProjects();
 
   const [f, setF] = useState({
-    work_origin_id: "", data_source_id: "", platform_id: "", project_id: "",
+    work_origin_id: "", data_source_id: "", project_id: "",
     title: "", description: "", area: "", channel: "", task_type: "",
     status: "todo", priority: "medium",
     impact: 3, complexity: 3, strategic_relevance: 3, urgency: 3, evidence_score: 3,
@@ -55,7 +54,6 @@ function NovaTask() {
     const payload = {
       work_origin_id: f.work_origin_id || null,
       data_source_id: f.data_source_id || null,
-      platform_id: f.platform_id || null,
       project_id: f.project_id || null,
       title: f.title.trim(),
       description: f.description || null,
@@ -99,7 +97,7 @@ function NovaTask() {
             <Field label="Título" required>
               <Input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="Ex.: Otimizar campanha Performance Max" required />
             </Field>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
               <Field label="Origem do trabalho">
                 <Select value={selVal(f.work_origin_id)} onValueChange={(v) => set("work_origin_id", fromSel(v))}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -118,15 +116,6 @@ function NovaTask() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Plataforma">
-                <Select value={selVal(f.platform_id)} onValueChange={(v) => set("platform_id", fromSel(v))}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NONE}>—</SelectItem>
-                    {platforms.map((platform) => <SelectItem key={platform.id} value={platform.id}>{platform.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </Field>
               <Field label="Projeto/Cliente">
                 <Select value={selVal(f.project_id)} onValueChange={(v) => set("project_id", fromSel(v))}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -142,12 +131,12 @@ function NovaTask() {
           <Card className="p-5 sm:p-6 border-border/70 shadow-[var(--shadow-card)] gap-0">
             <SectionTitle>Classificação</SectionTitle>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Field label="Tipo">
+              <Field label="Área">
                 <Select value={selVal(f.area)} onValueChange={(v) => set("area", fromSel(v))}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>—</SelectItem>
-                    {TASK_CATEGORIES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                    {AREAS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </Field>
@@ -195,7 +184,7 @@ function NovaTask() {
             <SectionTitle>Score qualitativo</SectionTitle>
             <div className="text-xs text-muted-foreground mb-4 leading-relaxed">
               Cálculo automático com pesos:<br />
-              Cada fator vai de 0 a {SCORE_MAX}: Impacto 30 · Complexidade 20 · Estratégia 20 · Urgência 15 · Evidência 15
+              Impacto 30 · Complexidade 20 · Estratégia 20 · Urgência 15 · Evidência 15
             </div>
             <SliderField label="Impacto" value={f.impact} onChange={(v) => set("impact", v)} />
             <SliderField label="Complexidade" value={f.complexity} onChange={(v) => set("complexity", v)} />
@@ -205,8 +194,8 @@ function NovaTask() {
             <div className="mt-5 p-4 rounded-lg border border-border/70 bg-muted/40">
               <div className="text-xs text-muted-foreground">Score previsto</div>
               <div className="flex items-baseline gap-2 mt-1">
-                <div className="text-3xl font-semibold tabular-nums">{previewScore.toFixed(1)}</div>
-                <div className="text-xs text-muted-foreground">/ {SCORE_MAX}</div>
+                <div className="text-3xl font-semibold tabular-nums">{previewScore.toFixed(2)}</div>
+                <div className="text-xs text-muted-foreground">/ 5</div>
               </div>
               <div className={`text-xs mt-1.5 font-medium ${cls.tone === "success" ? "text-success" : cls.tone === "warning" ? "text-warning-foreground" : cls.tone === "primary" ? "text-primary" : "text-muted-foreground"}`}>{cls.label}</div>
             </div>
@@ -236,8 +225,8 @@ function Field({ label, required, children }: { label: string; required?: boolea
 function SliderField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div className="mb-4">
-      <div className="flex justify-between text-xs mb-2"><span className="text-muted-foreground">{label}</span><span className="font-semibold tabular-nums">{value}</span></div>
-      <Slider min={0} max={SCORE_MAX} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
+      <div className="flex justify-between text-xs mb-2"><span className="text-muted-foreground">{label}</span><span className="font-semibold tabular-nums">{value} / 5</span></div>
+      <Slider min={0} max={5} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Layers, FolderKanban, ListChecks, Plus,
-  Upload, FileBarChart, Settings, Menu, Boxes,
+  Upload, FileBarChart, Settings, Menu,
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -13,7 +13,6 @@ const items = [
   { to: "/tasks/nova", label: "Nova task", icon: Plus, accent: true, group: "Trabalho" },
   { to: "/importacoes", label: "Importações", icon: Upload, group: "Trabalho" },
   { to: "/projetos", label: "Projetos/Clientes", icon: FolderKanban, group: "Estrutura" },
-  { to: "/plataformas", label: "Plataformas", icon: Boxes, group: "Estrutura" },
   { to: "/origens", label: "Origens", icon: Layers, group: "Estrutura" },
   { to: "/relatorios", label: "Relatórios", icon: FileBarChart, group: "Análise" },
   { to: "/configuracoes", label: "Configurações", icon: Settings, group: "Análise" },
