@@ -77,6 +77,27 @@ export type Database = {
           },
         ]
       }
+      platforms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           client: string | null
@@ -131,6 +152,7 @@ export type Database = {
           evidence_score: number | null
           id: string
           impact: number | null
+          platform_id: string | null
           priority: string | null
           project_id: string | null
           quality_score: number | null
@@ -159,6 +181,7 @@ export type Database = {
           evidence_score?: number | null
           id?: string
           impact?: number | null
+          platform_id?: string | null
           priority?: string | null
           project_id?: string | null
           quality_score?: number | null
@@ -187,6 +210,7 @@ export type Database = {
           evidence_score?: number | null
           id?: string
           impact?: number | null
+          platform_id?: string | null
           priority?: string | null
           project_id?: string | null
           quality_score?: number | null
@@ -206,6 +230,13 @@ export type Database = {
             columns: ["data_source_id"]
             isOneToOne: false
             referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "platforms"
             referencedColumns: ["id"]
           },
           {
