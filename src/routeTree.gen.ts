@@ -14,6 +14,7 @@ import { Route as ProjetosRouteImport } from './routes/projetos'
 import { Route as OrigensRouteImport } from './routes/origens'
 import { Route as ImportacoesRouteImport } from './routes/importacoes'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as BlueBoltRouteImport } from './routes/blue-bolt'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TasksIndexRouteImport } from './routes/tasks.index'
 import { Route as TasksNovaRouteImport } from './routes/tasks.nova'
@@ -43,6 +44,11 @@ const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlueBoltRoute = BlueBoltRouteImport.update({
+  id: '/blue-bolt',
+  path: '/blue-bolt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -61,6 +67,7 @@ const TasksNovaRoute = TasksNovaRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blue-bolt': typeof BlueBoltRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/importacoes': typeof ImportacoesRoute
   '/origens': typeof OrigensRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/blue-bolt': typeof BlueBoltRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/importacoes': typeof ImportacoesRoute
   '/origens': typeof OrigensRoute
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/blue-bolt': typeof BlueBoltRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/importacoes': typeof ImportacoesRoute
   '/origens': typeof OrigensRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/blue-bolt'
     | '/configuracoes'
     | '/importacoes'
     | '/origens'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/blue-bolt'
     | '/configuracoes'
     | '/importacoes'
     | '/origens'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/blue-bolt'
     | '/configuracoes'
     | '/importacoes'
     | '/origens'
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BlueBoltRoute: typeof BlueBoltRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ImportacoesRoute: typeof ImportacoesRoute
   OrigensRoute: typeof OrigensRoute
@@ -136,6 +149,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/blue-bolt': {
+      id: '/blue-bolt'
+      path: '/blue-bolt'
+      fullPath: '/blue-bolt'
+      preLoaderRoute: typeof BlueBoltRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/relatorios': {
       id: '/relatorios'
       path: '/relatorios'
@@ -197,6 +217,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BlueBoltRoute: BlueBoltRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ImportacoesRoute: ImportacoesRoute,
   OrigensRoute: OrigensRoute,

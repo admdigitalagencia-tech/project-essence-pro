@@ -19,7 +19,7 @@ import { AREAS, STATUS_LABELS, PRIORITY_LABELS, STATUSES, PRIORITIES, classifySc
 import { db, type Task } from "@/lib/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { auditTasksBatch } from "@/lib/audit.functions";
+import { auditTaskScore, auditTasksBatch } from "@/lib/audit.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/tasks/")({
@@ -68,9 +68,11 @@ function TasksPage() {
   const [q, setQ] = useState("");
   const [drafts, setDrafts] = useState<Record<string, EditableTaskFields>>({});
   const [savingIds, setSavingIds] = useState<string[]>([]);
+  const [auditingIds, setAuditingIds] = useState<string[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [auditing, setAuditing] = useState(false);
   const qc = useQueryClient();
+  const auditOne = useServerFn(auditTaskScore);
   const auditBatch = useServerFn(auditTasksBatch);
 
   const lookup = useMemo(() => ({
@@ -163,22 +165,48 @@ function TasksPage() {
     else { toast.success("Task excluída"); qc.invalidateQueries({ queryKey: ["tasks"] }); }
   }
 
+  function toAuditPayload(t: Task) {
+    return {
+      title: t.title, description: t.description, area: t.area,
+      channel: t.channel, task_type: t.task_type, status: t.status,
+      priority: t.priority, evidence: t.evidence, result: t.result,
+      project_id: t.project_id, data_source_id: t.data_source_id,
+      work_origin_id: t.work_origin_id, deadline: t.deadline,
+      completed_at: t.completed_at, task_date: t.task_date,
+      estimated_time: t.estimated_time, actual_time: t.actual_time,
+    };
+  }
+
+  async function runRecalculateOne(task: Task) {
+    setAuditingIds((current) => [...new Set([...current, task.id])]);
+    const toastId = toast.loading("Recalculando score da task…");
+    try {
+      const result = await auditOne({ data: { task: toAuditPayload(task) } });
+      const { error } = await db.from("tasks").update({
+        impact: result.impact,
+        complexity: result.complexity,
+        strategic_relevance: result.strategic_relevance,
+        urgency: result.urgency,
+        evidence_score: result.evidence_score,
+        score_audit_notes: result.notes,
+      }).eq("id", task.id);
+      if (error) throw error;
+      toast.success("Score recalculado.", { id: toastId });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Falha ao recalcular score.", { id: toastId });
+    } finally {
+      setAuditingIds((current) => current.filter((id) => id !== task.id));
+    }
+  }
+
   async function runRecalculate() {
     setConfirmOpen(false);
     if (filtered.length === 0) { toast.info("Nenhuma task no filtro atual."); return; }
     setAuditing(true);
     const toastId = toast.loading(`Auditando ${filtered.length} task(s)…`);
     try {
-      const payload = filtered.map((t: Task) => ({
-        id: t.id,
-        title: t.title, description: t.description, area: t.area,
-        channel: t.channel, task_type: t.task_type, status: t.status,
-        priority: t.priority, evidence: t.evidence, result: t.result,
-        project_id: t.project_id, data_source_id: t.data_source_id,
-        work_origin_id: t.work_origin_id, deadline: t.deadline,
-        completed_at: t.completed_at, task_date: t.task_date,
-        estimated_time: t.estimated_time, actual_time: t.actual_time,
-      }));
+      const payload = filtered.map((t: Task) => ({ id: t.id, ...toAuditPayload(t) }));
       // chunk to avoid huge single calls
       const CHUNK = 8;
       let done = 0;
@@ -252,7 +280,7 @@ function TasksPage() {
                   <th className="text-right px-3 py-3 font-semibold">Score</th>
                   <th className="text-left px-3 py-3 font-semibold">Classificação</th>
                   <th className="text-left px-3 py-3 font-semibold">Data</th>
-                  <th className="w-10"></th>
+                  <th className="w-20"></th>
                 </tr>
               </thead>
               <tbody>
@@ -265,6 +293,7 @@ function TasksPage() {
                   const c = classifyScore(score);
                   const draft = drafts[t.id];
                   const saving = savingIds.includes(t.id);
+                  const auditingTask = auditingIds.includes(t.id);
                   if (!draft) return null;
                   return (
                     <tr key={t.id} className="border-t border-border/60 hover:bg-muted/30 transition-colors">
@@ -406,9 +435,25 @@ function TasksPage() {
                         />
                       </td>
                       <td className="px-2 py-3">
-                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)} className="h-8 w-8" disabled={saving}>
-                          <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => runRecalculateOne(t)}
+                            className="h-8 w-8"
+                            disabled={saving || auditingTask}
+                            title="Recalcular score desta task"
+                          >
+                            {auditingTask ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                            ) : (
+                              <Sparkles className="h-3.5 w-3.5 text-muted-foreground" />
+                            )}
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => remove(t.id)} className="h-8 w-8" disabled={saving || auditingTask}>
+                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -427,6 +472,7 @@ function TasksPage() {
           {filtered.map((t) => {
             const score = t.quality_score ?? 0;
             const c = classifyScore(score);
+            const auditingTask = auditingIds.includes(t.id);
             return (
               <div key={t.id} className="p-4 space-y-2.5">
                 <div className="flex items-start justify-between gap-2">
@@ -449,9 +495,19 @@ function TasksPage() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>{t.task_date ?? t.created_at.slice(0,10)}</span>
-                  <button onClick={() => remove(t.id)} className="text-destructive flex items-center gap-1 hover:underline">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => runRecalculateOne(t)}
+                      disabled={auditingTask}
+                      className="text-primary flex items-center gap-1 hover:underline disabled:opacity-60"
+                    >
+                      {auditingTask ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                      Recalcular
+                    </button>
+                    <button onClick={() => remove(t.id)} className="text-destructive flex items-center gap-1 hover:underline" disabled={auditingTask}>
                     <Trash2 className="h-3 w-3" /> Excluir
-                  </button>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet, Link, createRootRouteWithContext, useRouter,
-  HeadContent, Scripts,
+  HeadContent, Scripts, useRouterState,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -94,6 +94,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isPublicView = pathname === "/blue-bolt";
+
+  if (isPublicView) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <main className="min-h-screen bg-background">
+          <Outlet />
+        </main>
+        <Toaster />
+      </QueryClientProvider>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen flex bg-background">

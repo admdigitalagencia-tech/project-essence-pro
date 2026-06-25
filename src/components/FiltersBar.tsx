@@ -1,6 +1,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -26,6 +27,8 @@ export function FiltersBar({
 
   const activeCount =
     (filters.period !== "all" ? 1 : 0) +
+    (filters.date_from ? 1 : 0) +
+    (filters.date_to ? 1 : 0) +
     (filters.work_origin_id ? 1 : 0) +
     (filters.data_source_id ? 1 : 0) +
     (filters.project_id ? 1 : 0) +
@@ -56,9 +59,12 @@ export function FiltersBar({
           )}
         </div>
         <CollapsibleContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-9 gap-3 mt-3">
             <FilterItem label="Período">
-              <Select value={filters.period} onValueChange={(v) => update({ period: v as Filters["period"] })}>
+              <Select
+                value={filters.period}
+                onValueChange={(v) => update({ period: v as Filters["period"], date_from: "", date_to: "" })}
+              >
                 <SelectTrigger><SelectValue placeholder="Período" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todo período</SelectItem>
@@ -67,6 +73,24 @@ export function FiltersBar({
                   <SelectItem value="90d">Últimos 90 dias</SelectItem>
                 </SelectContent>
               </Select>
+            </FilterItem>
+
+            <FilterItem label="De">
+              <Input
+                type="date"
+                value={filters.date_from}
+                max={filters.date_to || undefined}
+                onChange={(e) => update({ date_from: e.target.value, period: "all" })}
+              />
+            </FilterItem>
+
+            <FilterItem label="Até">
+              <Input
+                type="date"
+                value={filters.date_to}
+                min={filters.date_from || undefined}
+                onChange={(e) => update({ date_to: e.target.value, period: "all" })}
+              />
             </FilterItem>
 
             <FilterItem label="Origem">

@@ -4,6 +4,8 @@ import { AREAS, PRIORITIES, STATUSES } from "./constants";
 
 export type Filters = {
   period: "all" | "7d" | "30d" | "90d";
+  date_from: string;
+  date_to: string;
   work_origin_id: string;
   data_source_id: string;
   project_id: string;
@@ -16,6 +18,8 @@ export type Filters = {
 
 export const initialFilters: Filters = {
   period: "all",
+  date_from: "",
+  date_to: "",
   work_origin_id: "",
   data_source_id: "",
   project_id: "",
@@ -40,6 +44,9 @@ export function applyFilters(tasks: Task[], f: Filters): Task[] {
     cutoff = new Date(Date.now() - days * 86400000);
   }
   return tasks.filter((t) => {
+    const taskDate = (t.task_date ?? t.created_at.slice(0, 10)).slice(0, 10);
+    if (f.date_from && taskDate < f.date_from) return false;
+    if (f.date_to && taskDate > f.date_to) return false;
     if (cutoff) {
       const d = new Date(t.task_date ?? t.created_at);
       if (d < cutoff) return false;
