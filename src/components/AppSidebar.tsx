@@ -6,6 +6,7 @@ import {
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const items = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true, group: "Visão geral" },
@@ -77,8 +78,9 @@ export function AppSidebar() {
         <Brand />
       </div>
       <NavList pathname={pathname} />
-      <div className="p-4 text-[11px] text-muted-foreground border-t border-sidebar-border">
-        v0.1 · single user
+      <div className="p-3 flex items-center justify-between gap-2 text-[11px] text-muted-foreground border-t border-sidebar-border">
+        <span className="pl-2">v0.1 · single user</span>
+        <ThemeToggle />
       </div>
     </aside>
   );
