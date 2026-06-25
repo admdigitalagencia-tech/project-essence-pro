@@ -8,6 +8,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar, MobileNav } from "@/components/AppSidebar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -119,6 +120,7 @@ function RootComponent() {
               <div className="w-7 h-7 rounded-lg bg-primary text-primary-foreground grid place-items-center text-xs font-semibold">L</div>
               <span className="font-semibold text-sm">Lucas Productivity OS</span>
             </div>
+            <ThemeToggle className="ml-auto" />
           </header>
           <main className="flex-1 min-w-0">
             <Outlet />
