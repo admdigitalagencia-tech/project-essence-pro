@@ -34,6 +34,7 @@ const CHART_COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#0
 
 type ManagerFilters = {
   period: "all" | "7d" | "30d" | "90d";
+  sort: "created_desc" | "created_asc" | "task_desc" | "task_asc";
   date_from: string;
   date_to: string;
   project_id: string;
@@ -44,6 +45,7 @@ type ManagerFilters = {
 
 const initialManagerFilters: ManagerFilters = {
   period: "all",
+  sort: "created_desc",
   date_from: "",
   date_to: "",
   project_id: "",
@@ -136,9 +138,7 @@ function BlueBoltManagerPage() {
       .sort((a, b) => (b.quality_score ?? 0) - (a.quality_score ?? 0))
       .slice(0, 8);
 
-    const allDeliveries = [...filtered].sort((a, b) =>
-      (b.task_date ?? b.created_at).localeCompare(a.task_date ?? a.created_at),
-    );
+    const allDeliveries = sortTasks(filtered, filters.sort);
 
     return {
       total,
@@ -154,12 +154,13 @@ function BlueBoltManagerPage() {
       keyDeliveries,
       allDeliveries,
     };
-  }, [blueBoltProjects, filtered]);
+  }, [blueBoltProjects, filtered, filters.sort]);
 
   const update = (patch: Partial<ManagerFilters>) => setFilters((current) => ({ ...current, ...patch }));
   const reset = () => setFilters(initialManagerFilters);
   const activeFilters =
     (filters.period !== "all" ? 1 : 0) +
+    (filters.sort !== "created_desc" ? 1 : 0) +
     (filters.date_from ? 1 : 0) +
     (filters.date_to ? 1 : 0) +
     (filters.project_id ? 1 : 0) +
@@ -393,7 +394,7 @@ function ManagerFiltersBar({
   return (
     <Card className="p-3 sm:p-4 mb-6 border-border/70 shadow-none gap-0">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3 flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 flex-1">
           <FilterItem label="Período">
             <Select
               value={filters.period}
@@ -405,6 +406,18 @@ function ManagerFiltersBar({
                 <SelectItem value="7d">Últimos 7 dias</SelectItem>
                 <SelectItem value="30d">Últimos 30 dias</SelectItem>
                 <SelectItem value="90d">Últimos 90 dias</SelectItem>
+              </SelectContent>
+            </Select>
+          </FilterItem>
+
+          <FilterItem label="Ordenar">
+            <Select value={filters.sort} onValueChange={(value) => update({ sort: value as ManagerFilters["sort"] })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_desc">Criação: mais recentes</SelectItem>
+                <SelectItem value="created_asc">Criação: mais antigas</SelectItem>
+                <SelectItem value="task_desc">Data da task: recentes</SelectItem>
+                <SelectItem value="task_asc">Data da task: antigas</SelectItem>
               </SelectContent>
             </Select>
           </FilterItem>
@@ -512,6 +525,16 @@ function applyManagerFilters<T extends {
     if (filters.status && task.status !== filters.status) return false;
     if (filters.priority && task.priority !== filters.priority) return false;
     return true;
+  });
+}
+
+function sortTasks<T extends { task_date: string | null; created_at: string }>(tasks: T[], sort: ManagerFilters["sort"]) {
+  return [...tasks].sort((a, b) => {
+    const sortByCreated = sort === "created_desc" || sort === "created_asc";
+    const direction = sort.endsWith("_asc") ? 1 : -1;
+    const aValue = sortByCreated ? a.created_at : (a.task_date ?? a.created_at);
+    const bValue = sortByCreated ? b.created_at : (b.task_date ?? b.created_at);
+    return aValue.localeCompare(bValue) * direction;
   });
 }
 

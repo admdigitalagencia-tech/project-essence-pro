@@ -27,6 +27,7 @@ export function FiltersBar({
 
   const activeCount =
     (filters.period !== "all" ? 1 : 0) +
+    (filters.sort !== "created_desc" ? 1 : 0) +
     (filters.date_from ? 1 : 0) +
     (filters.date_to ? 1 : 0) +
     (filters.work_origin_id ? 1 : 0) +
@@ -59,7 +60,7 @@ export function FiltersBar({
           )}
         </div>
         <CollapsibleContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-9 gap-3 mt-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 2xl:grid-cols-10 gap-3 mt-3">
             <FilterItem label="Período">
               <Select
                 value={filters.period}
@@ -71,6 +72,18 @@ export function FiltersBar({
                   <SelectItem value="7d">Últimos 7 dias</SelectItem>
                   <SelectItem value="30d">Últimos 30 dias</SelectItem>
                   <SelectItem value="90d">Últimos 90 dias</SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterItem>
+
+            <FilterItem label="Ordenar">
+              <Select value={filters.sort} onValueChange={(v) => update({ sort: v as Filters["sort"] })}>
+                <SelectTrigger><SelectValue placeholder="Ordenar" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_desc">Criação: mais recentes</SelectItem>
+                  <SelectItem value="created_asc">Criação: mais antigas</SelectItem>
+                  <SelectItem value="task_desc">Data da task: recentes</SelectItem>
+                  <SelectItem value="task_asc">Data da task: antigas</SelectItem>
                 </SelectContent>
               </Select>
             </FilterItem>

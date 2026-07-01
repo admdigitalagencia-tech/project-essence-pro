@@ -4,6 +4,7 @@ import { AREAS, PRIORITIES, STATUSES } from "./constants";
 
 export type Filters = {
   period: "all" | "7d" | "30d" | "90d";
+  sort: "created_desc" | "created_asc" | "task_desc" | "task_asc";
   date_from: string;
   date_to: string;
   work_origin_id: string;
@@ -18,6 +19,7 @@ export type Filters = {
 
 export const initialFilters: Filters = {
   period: "all",
+  sort: "created_desc",
   date_from: "",
   date_to: "",
   work_origin_id: "",
@@ -43,7 +45,7 @@ export function applyFilters(tasks: Task[], f: Filters): Task[] {
     const days = f.period === "7d" ? 7 : f.period === "30d" ? 30 : 90;
     cutoff = new Date(Date.now() - days * 86400000);
   }
-  return tasks.filter((t) => {
+  const filtered = tasks.filter((t) => {
     const taskDate = (t.task_date ?? t.created_at.slice(0, 10)).slice(0, 10);
     if (f.date_from && taskDate < f.date_from) return false;
     if (f.date_to && taskDate > f.date_to) return false;
@@ -60,6 +62,14 @@ export function applyFilters(tasks: Task[], f: Filters): Task[] {
     if (f.impactMin && (t.impact ?? 0) < f.impactMin) return false;
     if (f.complexityMin && (t.complexity ?? 0) < f.complexityMin) return false;
     return true;
+  });
+
+  return [...filtered].sort((a, b) => {
+    const sortByCreated = f.sort === "created_desc" || f.sort === "created_asc";
+    const direction = f.sort.endsWith("_asc") ? 1 : -1;
+    const aValue = sortByCreated ? a.created_at : (a.task_date ?? a.created_at);
+    const bValue = sortByCreated ? b.created_at : (b.task_date ?? b.created_at);
+    return aValue.localeCompare(bValue) * direction;
   });
 }
 
