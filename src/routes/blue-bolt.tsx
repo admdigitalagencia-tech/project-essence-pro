@@ -43,7 +43,7 @@ type ManagerFilters = {
 };
 
 const initialManagerFilters: ManagerFilters = {
-  period: "30d",
+  period: "all",
   date_from: "",
   date_to: "",
   project_id: "",
@@ -87,6 +87,7 @@ function BlueBoltManagerPage() {
 
     const byProject = blueBoltProjects
       .map((project) => ({
+        id: project.id,
         name: project.name,
         value: filtered.filter((task) => task.project_id === project.id).length,
       }))
@@ -106,11 +107,12 @@ function BlueBoltManagerPage() {
     const statusMap = new Map<string, number>();
     filtered.forEach((task) => statusMap.set(task.status, (statusMap.get(task.status) ?? 0) + 1));
     const byStatus = [...statusMap.entries()].map(([status, value]) => ({
+      status,
       name: STATUS_LABELS[status] ?? status,
       value,
     }));
 
-    const weeks: { name: string; value: number }[] = [];
+    const weeks: { name: string; value: number; start: string; end: string }[] = [];
     for (let i = 7; i >= 0; i--) {
       const start = new Date();
       start.setDate(start.getDate() - i * 7 - 6);
@@ -122,16 +124,21 @@ function BlueBoltManagerPage() {
         const date = new Date(task.task_date ?? task.created_at);
         return date >= start && date <= end;
       }).length;
-      weeks.push({ name: `${start.getDate()}/${start.getMonth() + 1}`, value: count });
+      weeks.push({
+        name: `${start.getDate()}/${start.getMonth() + 1}`,
+        value: count,
+        start: toDateInput(start),
+        end: toDateInput(end),
+      });
     }
 
     const keyDeliveries = [...filtered]
       .sort((a, b) => (b.quality_score ?? 0) - (a.quality_score ?? 0))
       .slice(0, 8);
 
-    const recentDeliveries = [...filtered]
-      .sort((a, b) => (b.task_date ?? b.created_at).localeCompare(a.task_date ?? a.created_at))
-      .slice(0, 12);
+    const allDeliveries = [...filtered].sort((a, b) =>
+      (b.task_date ?? b.created_at).localeCompare(a.task_date ?? a.created_at),
+    );
 
     return {
       total,
@@ -145,14 +152,14 @@ function BlueBoltManagerPage() {
       byStatus,
       weeks,
       keyDeliveries,
-      recentDeliveries,
+      allDeliveries,
     };
   }, [blueBoltProjects, filtered]);
 
   const update = (patch: Partial<ManagerFilters>) => setFilters((current) => ({ ...current, ...patch }));
   const reset = () => setFilters(initialManagerFilters);
   const activeFilters =
-    (filters.period !== "30d" ? 1 : 0) +
+    (filters.period !== "all" ? 1 : 0) +
     (filters.date_from ? 1 : 0) +
     (filters.date_to ? 1 : 0) +
     (filters.project_id ? 1 : 0) +
@@ -194,7 +201,7 @@ function BlueBoltManagerPage() {
       ) : (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
-            <Stat icon={<ListChecks className="h-4 w-4" />} label="Tasks no período" value={metrics.total} />
+            <Stat icon={<ListChecks className="h-4 w-4" />} label="Tasks no filtro" value={metrics.total} />
             <Stat icon={<CheckCircle2 className="h-4 w-4" />} label="Concluídas" value={metrics.done} sub={metrics.total ? `${Math.round((metrics.done / metrics.total) * 100)}% do total` : "—"} />
             <Stat icon={<Target className="h-4 w-4" />} label="Em aberto" value={metrics.open} />
             <Stat icon={<Star className="h-4 w-4" />} label="Score médio" value={metrics.avgScore.toFixed(1)} sub={classifyScore(metrics.avgScore).label} />
@@ -205,7 +212,14 @@ function BlueBoltManagerPage() {
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
             <ChartCard title="Evolução semanal">
               <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={metrics.weeks}>
+                <LineChart
+                  data={metrics.weeks}
+                  onClick={(state) => {
+                    const payload = state?.activePayload?.[0]?.payload;
+                    if (payload) update({ period: "all", date_from: payload.start, date_to: payload.end });
+                  }}
+                  className="cursor-pointer"
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} />
@@ -217,7 +231,15 @@ function BlueBoltManagerPage() {
 
             <ChartCard title="Projetos mais trabalhados">
               <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={metrics.byProject} layout="vertical">
+                <BarChart
+                  data={metrics.byProject}
+                  layout="vertical"
+                  onClick={(state) => {
+                    const payload = state?.activePayload?.[0]?.payload;
+                    if (payload?.id) update({ project_id: payload.id });
+                  }}
+                  className="cursor-pointer"
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={118} />
@@ -230,7 +252,17 @@ function BlueBoltManagerPage() {
             <ChartCard title="Distribuição por status">
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
-                  <Pie data={metrics.byStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={86} label>
+                  <Pie
+                    data={metrics.byStatus}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={86}
+                    label
+                    onClick={(entry) => update({ status: entry.status })}
+                    className="cursor-pointer"
+                  >
                     {metrics.byStatus.map((_, index) => (
                       <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                     ))}
@@ -248,10 +280,15 @@ function BlueBoltManagerPage() {
               ) : (
                 <div className="space-y-2">
                   {metrics.byArea.map((area) => (
-                    <div key={area.name} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2">
+                    <button
+                      key={area.name}
+                      type="button"
+                      onClick={() => update({ area: area.name })}
+                      className="flex w-full items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
+                    >
                       <span className="text-sm truncate">{area.name}</span>
                       <Badge variant="secondary">{area.value}</Badge>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -273,8 +310,10 @@ function BlueBoltManagerPage() {
 
           <Card className="border-border/70 shadow-[var(--shadow-card)] overflow-hidden gap-0 py-0">
             <div className="p-4 border-b border-border/70">
-              <div className="text-sm font-semibold">Leitura das tasks recentes</div>
-              <div className="text-xs text-muted-foreground mt-1">Lista somente leitura para acompanhamento gerencial.</div>
+              <div className="text-sm font-semibold">Todas as tasks Blue Bolt</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {metrics.allDeliveries.length} task(s) no filtro atual. Clique nos gráficos para refinar a lista.
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -290,12 +329,12 @@ function BlueBoltManagerPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {metrics.recentDeliveries.length === 0 ? (
+                  {metrics.allDeliveries.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="p-8 text-center text-muted-foreground">Sem tasks no filtro atual.</td>
                     </tr>
                   ) : (
-                    metrics.recentDeliveries.map((task) => {
+                    metrics.allDeliveries.map((task) => {
                       const score = task.quality_score ?? 0;
                       const scoreInfo = classifyScore(score);
                       return (
@@ -497,6 +536,12 @@ function DeliveryRow({ task, projects }: { task: any; projects: any[] }) {
 function projectName(projectId: string | null, projects: any[]) {
   if (!projectId) return "Sem projeto";
   return projects.find((project) => project.id === projectId)?.name ?? "Sem projeto";
+}
+
+function toDateInput(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function priorityClasses(priority: string) {
